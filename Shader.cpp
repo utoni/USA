@@ -1,5 +1,6 @@
 #include "Shader.hpp"
 
+#include <array>
 #include <fstream>
 #include <sstream>
 
@@ -19,11 +20,11 @@ Shader::~Shader()
 
 void Shader::CompileAndLink(const std::string& vs_path, const std::string& fs_path)
 {
-    const auto vs_source = LoadFromFile(vs_path);
-    const auto fs_source = LoadFromFile(fs_path);
+    const auto vsSource = LoadFromFile(vs_path);
+    const auto fsSource = LoadFromFile(fs_path);
 
-    unsigned int vs = Compile(GL_VERTEX_SHADER, vs_source);
-    unsigned int fs = Compile(GL_FRAGMENT_SHADER, fs_source);
+    unsigned int vs = Compile(GL_VERTEX_SHADER, vsSource);
+    unsigned int fs = Compile(GL_FRAGMENT_SHADER, fsSource);
     unsigned int shader = glCreateProgram();
     glAttachShader(shader, vs);
     glAttachShader(shader, fs);
@@ -32,10 +33,10 @@ void Shader::CompileAndLink(const std::string& vs_path, const std::string& fs_pa
     GLint success = GL_FALSE;
     glGetProgramiv(shader, GL_LINK_STATUS, &success);
     if (success != GL_TRUE) {
-        char infoLog[512];
-        glGetProgramInfoLog(shader, 512, nullptr, infoLog);
+        std::array<char, 512> infoLog = {};
+        glGetProgramInfoLog(shader, std::size(infoLog), nullptr, std::data(infoLog));
         std::stringstream ss;
-        ss << "Shader Linker Error: " << infoLog << "\n";
+        ss << "Shader Linker Error: " << std::data(infoLog) << "\n";
         throw std::runtime_error(ss.str());
     }
 
@@ -44,6 +45,16 @@ void Shader::CompileAndLink(const std::string& vs_path, const std::string& fs_pa
     ShaderID = shader;
 
     InitUniforms();
+}
+
+Shader::DefaultLocations Shader::GetDefaultLocations() const
+{
+    Shader::DefaultLocations defLocs;
+
+    defLocs.Offset = GetUniformLocation("offset");
+    defLocs.Texture = GetUniformLocation("tex");
+    defLocs.MVP = GetUniformLocation("mvp");
+    return defLocs;
 }
 
 std::string Shader::LoadFromFile(const std::string& path)
@@ -57,18 +68,18 @@ std::string Shader::LoadFromFile(const std::string& path)
 unsigned int Shader::Compile(unsigned int type, const std::string& source)
 {
     unsigned int shader = glCreateShader(type);
-    const char* shader_source = source.c_str();
-    glShaderSource(shader, 1, &shader_source, nullptr);
+    const char* shaderSource = source.c_str();
+    glShaderSource(shader, 1, &shaderSource, nullptr);
     glCompileShader(shader);
 
     GLint success = GL_FALSE;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
     if (success != GL_TRUE)
     {
-        char infoLog[512];
-        glGetShaderInfoLog(shader, 512, nullptr, infoLog);
+        std::array<char, 512> infoLog = {};
+        glGetShaderInfoLog(shader, std::size(infoLog), nullptr, std::data(infoLog));
         std::stringstream ss;
-        ss << "Shader Compilation Error: " << infoLog << "\n";
+        ss << "Shader Compilation Error: " << std::data(infoLog) << "\n";
         throw std::runtime_error(ss.str());
     }
 
@@ -85,14 +96,14 @@ void Shader::InitUniforms()
 
     for (GLuint index = 0; index < static_cast<GLuint>(amountOfUniforms); ++index)
     {
-        GLchar name[512];
+        std::array<GLchar, 512> name = {};
         GLenum type;
         GLint size;
-        glGetActiveUniform(ShaderID, index, sizeof(name), nullptr, &size, &type, name);
-        name[sizeof(name) - 1] = '\0';
+        glGetActiveUniform(ShaderID, index, std::size(name), nullptr, &size, &type, std::data(name));
+        name[std::size(name) - 1] = '\0';
 
-        GLint location = glGetUniformLocation(ShaderID, name);
+        GLint location = glGetUniformLocation(ShaderID, std::data(name));
         if (location >= 0)
-            UniformLocations[name] = location;
+            UniformLocations[std::data(name)] = location;
     }
 }

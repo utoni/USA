@@ -8,6 +8,7 @@
 
 struct Transform
 {
+    [[nodiscard]]
     static glm::mat4 Create2D(float x, float y,
                               float w, float h)
     {

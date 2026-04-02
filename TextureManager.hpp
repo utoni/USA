@@ -5,6 +5,7 @@
 
 #include <filesystem>
 #include <unordered_map>
+#include <stdexcept>
 #include <string>
 
 class TextureManager
@@ -13,7 +14,9 @@ public:
     explicit TextureManager()
     {}
     ~TextureManager() {}
+
     void LoadTextures(const std::filesystem::path& textureRoot);
+    [[nodiscard]]
     unsigned int Get(const std::string& name) const {
         const auto iter = Textures.find(name);
         if (iter == Textures.cend())

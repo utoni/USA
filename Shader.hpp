@@ -4,11 +4,19 @@
 
 #include "Optimization.hpp"
 
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
 
 class Shader
 {
+public:
+    struct DefaultLocations {
+        int Offset = -1;
+        int Texture = -1;
+        int MVP = -1;
+    };
+
 public:
     explicit Shader() {}
     ~Shader();
@@ -23,9 +31,15 @@ public:
     void SetUniform(int location, const GLfloat* value4fv) const {
         return glUniformMatrix4fv(location, 1, GL_FALSE, value4fv);
     }
-    int GetUniformLocation(const std::string& name) {
-        return UniformLocations[name];
+    [[nodiscard]]
+    int GetUniformLocation(const std::string& name) const {
+        const auto iter = UniformLocations.find(name);
+        if (iter == UniformLocations.cend())
+            throw std::runtime_error("Shader Uniform does not exist!");
+        return iter->second;
     }
+    [[nodiscard]]
+    DefaultLocations GetDefaultLocations() const;
     void Use() const { return glUseProgram(ShaderID); }
 
 private:

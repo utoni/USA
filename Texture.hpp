@@ -16,9 +16,12 @@ public:
     Texture& operator=(const Texture&) = delete;
 
     void Open(const std::filesystem::path& path);
+    [[nodiscard]]
     unsigned int Get() const { return TextureID; }
 
+    [[nodiscard]]
     static Texture Create(const std::filesystem::path& path);
+
 private:
     unsigned int TextureID = -1;
 };

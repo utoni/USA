@@ -19,6 +19,7 @@ public:
 
     void Init();
     void Use() const;
+    [[nodiscard]]
     unsigned int Get() const { return FboTextureID; }
     void RenderToScreen(Quad& quad, int width, int height) const;
 private:
