@@ -17,7 +17,7 @@
 const unsigned int WIDTH = 1920;
 const unsigned int HEIGHT = 1080;
 
-const unsigned int INTERNAL_WIDTH = 420;
+const unsigned int INTERNAL_WIDTH = 480;
 const unsigned int INTERNAL_HEIGHT = 270;
 
 void GLAPIENTRY GLDebugMessage(
@@ -57,12 +57,11 @@ int main() {
         quad.Create();
 
         std::vector<Layer> layers = {
-            Layer{ { texMgr.Get("sky"), texMgr.Get("sky2") }, shader, 0.015f },
-            Layer{ { texMgr.Get("faraway") }, shader, 0.02f },
-            Layer{ { texMgr.Get("trees") }, shader, 0.05f },
-            Layer{ { texMgr.Get("morevegetation") }, shader, 0.15f },
-            Layer{ { texMgr.Get("vegetation") }, shader, 0.20f },
-            Layer{ { texMgr.Get("foreground"), texMgr.Get("foreground2") }, shader, 0.35f },
+            Layer{ { texMgr.Get("background") }, shader, 0.05f },
+            Layer{ { texMgr.Get("midground") }, shader, 0.10f },
+            Layer{ { texMgr.Get("foreground3") }, shader, 0.15f },
+            Layer{ { texMgr.Get("foreground2") }, shader, 0.20f },
+            Layer{ { texMgr.Get("foreground") }, shader, 0.35f },
         };
 
         float lastTime = glfwGetTime();
