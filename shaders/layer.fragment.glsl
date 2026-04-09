@@ -11,5 +11,4 @@ void main() {
     coords.x = floor(coords.x / texelSize) * texelSize;
     FragColor = texture(tex, coords);
     if (FragColor.a < 0.01) discard;
-    //FragColor = vec4(fract(TexCoord.x), fract(TexCoord.y), 0.0, 1.0);
 }

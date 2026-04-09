@@ -10,17 +10,19 @@
 
 Framebuffer::~Framebuffer()
 {
-    using IdType = decltype(FboTextureID);
-
-    if (FboTextureID != static_cast<IdType>(-1))
+    if (FboTextureID != 0)
         glDeleteTextures(1, &FboTextureID);
 
-    if (FboID != static_cast<IdType>(-1))
+    if (FboID != 0)
         glDeleteFramebuffers(1, &FboID);
 }
 
 void Framebuffer::Init()
 {
+    Locations.UvOffset = FboShader.GetUniformLocation("uvOffset");
+    Locations.UvScale = FboShader.GetUniformLocation("uvScale");
+    Locations.MVP = FboShader.GetUniformLocation("mvp");
+
     glGenFramebuffers(1, &FboID);
     glBindFramebuffer(GL_FRAMEBUFFER, FboID);
 
@@ -58,6 +60,9 @@ void Framebuffer::Use() const
 {
     glBindFramebuffer(GL_FRAMEBUFFER, FboID);
     glViewport(0, 0, Width, Height);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glClearColor(0, 0, 0, 0);
     glClear(GL_COLOR_BUFFER_BIT);
 }
 
@@ -69,8 +74,8 @@ void Framebuffer::BeginFrame(Quad& quad) const
 
 void Framebuffer::SetAspectRatio(int glfwWidth, int glfwHeight) const
 {
-    float windowAspect = (float)glfwWidth / glfwHeight;
-    float targetAspect = (float)Width / Height;
+    float windowAspect = static_cast<float>(glfwWidth) / static_cast<float>(glfwHeight);
+    float targetAspect = static_cast<float>(Width) / static_cast<float>(Height);
 
     int viewportX = 0;
     int viewportY = 0;
@@ -81,16 +86,17 @@ void Framebuffer::SetAspectRatio(int glfwWidth, int glfwHeight) const
     {
         // Pillarbox
         viewportH = glfwHeight;
-        viewportW = (int)(viewportH * targetAspect);
+        viewportW = static_cast<int>(static_cast<float>(viewportH) * targetAspect);
         viewportX = (glfwWidth - viewportW) / 2;
     } else {
         // Letterbox
         viewportW = glfwWidth;
-        viewportH = (int)(viewportW / targetAspect);
+        viewportH = static_cast<int>(static_cast<float>(viewportW) / targetAspect);
         viewportY = (glfwHeight - viewportH) / 2;
     }
 
     glViewport(viewportX, viewportY, viewportW, viewportH);
+    glClearColor(0, 0, 0, 0);
     glClear(GL_COLOR_BUFFER_BIT);
 }
 
@@ -107,7 +113,9 @@ void Framebuffer::RenderToScreen(Quad& quad, int width, int height) const
 
     SetAspectRatio(width, height);
 
-    glm::mat4 model = Transform::Create2D(0.0f, 0.0f, width, height);
+    glm::mat4 model = Transform::Create2D(0.0f, 0.0f,
+                                          static_cast<float>(width),
+                                          static_cast<float>(height));
 
     glm::mat4 projection =
         glm::ortho(0.0f, (float)width,
@@ -116,8 +124,8 @@ void Framebuffer::RenderToScreen(Quad& quad, int width, int height) const
     glm::mat4 mvp = projection * model;
 
     FboShader.Use();
-    FboShader.SetUniform(Locations.Texture, 0);
-    FboShader.SetUniform(Locations.Offset, 0.0f);
+    FboShader.SetUniform(Locations.UvOffset, 0.0f, 0.0f);
+    FboShader.SetUniform(Locations.UvScale, 1.0f, 1.0f);
     FboShader.SetUniform(Locations.MVP, glm::value_ptr(mvp));
 
     EndFrame();

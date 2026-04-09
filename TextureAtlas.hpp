@@ -24,7 +24,7 @@ public:
     ~TextureAtlas() {}
 
     void SetTexture(const TextureManager& texMgr,
-                     const std::string& name);
+                    const std::string& name);
     void Add(const std::string& name,
              int x, int y, int width, int height);
     [[nodiscard]]
@@ -41,7 +41,7 @@ public:
 private:
     int TextureAtlasWidth;
     int TextureAtlasHeight;
-    unsigned int TextureAtlasID = -1;
+    unsigned int TextureAtlasID = 0;
     std::unordered_map<const std::string, Region,
                        Optimization::TransparentHash,
                        Optimization::TransparentEqual> Regions;

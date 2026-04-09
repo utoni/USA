@@ -9,13 +9,8 @@ class Layer
 {
 public:
     explicit Layer(const std::vector<unsigned int>& textureIDs,
-                   Shader& shader,
-                   float scrollSpeed)
-        : TextureIDs(textureIDs), LayerShader(shader),
-          Locations(shader.GetDefaultLocations()),
-          ScrollSpeed(scrollSpeed)
-    {}
-    ~Layer() {}
+                   const Shader& shader,
+                   float scrollSpeed);
 
     void Update(float delta);
     void Render(int width, int height,
@@ -23,8 +18,12 @@ public:
 
 private:
     const std::vector<unsigned int> TextureIDs;
-    Shader& LayerShader;
-    Shader::DefaultLocations Locations;
+    const Shader& LayerShader;
+    struct {
+        int UvOffset = -1;
+        int UvScale = -1;
+        int MVP = -1;
+    } Locations;
     float ScrollSpeed;
     float Offset = 0.0f;
 };

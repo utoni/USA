@@ -6,6 +6,17 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <math.h>
 
+Layer::Layer(const std::vector<unsigned int>& textureIDs,
+             const Shader& shader,
+             float scrollSpeed)
+    : TextureIDs(textureIDs), LayerShader(shader),
+      ScrollSpeed(scrollSpeed)
+{
+    Locations.UvOffset = LayerShader.GetUniformLocation("uvOffset");
+    Locations.UvScale = LayerShader.GetUniformLocation("uvScale");
+    Locations.MVP = LayerShader.GetUniformLocation("mvp");
+}
+
 void Layer::Update(float delta)
 {
     Offset += ScrollSpeed * delta;
@@ -14,10 +25,11 @@ void Layer::Update(float delta)
 void Layer::Render(int width, int height,
                    const Quad& quad) const
 {
-    int texCount = TextureIDs.size();
-    float texOffset = fmod(Offset, texCount);
+    int texCount = static_cast<int>(TextureIDs.size());
+    auto texOffset = fmod(static_cast<double>(Offset),
+                          static_cast<double>(texCount));
     int texIndex = (int)texOffset;
-    float localOffset = texOffset - texIndex;
+    auto localOffset = texOffset - texIndex;
 
     glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(width),
                                       0.0f, static_cast<float>(height));
@@ -26,12 +38,14 @@ void Layer::Render(int width, int height,
         int idx = (texIndex + i) % texCount;
         float x = floor((-localOffset + i) * width);
 
-        const auto model = Transform::Create2D(x, 0.0f, width, height);
+        const auto model = Transform::Create2D(x, 0.0f,
+                                                                static_cast<float>(width),
+                                                                static_cast<float>(height));
         glm::mat4 mvp = projection * model;
 
         LayerShader.Use();
-        LayerShader.SetUniform(Locations.Texture, 0);
-        LayerShader.SetUniform(Locations.Offset, 0.0f);
+        LayerShader.SetUniform(Locations.UvOffset, 0.0f, 0.0f);
+        LayerShader.SetUniform(Locations.UvScale, 1.0f, 1.0f);
         LayerShader.SetUniform(Locations.MVP, glm::value_ptr(mvp));
 
         glActiveTexture(GL_TEXTURE0);

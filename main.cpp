@@ -11,7 +11,9 @@
 #include "Framebuffer.hpp"
 #include "Layer.hpp"
 #include "Quad.hpp"
-#include "Shader.hpp"
+#include "ShaderManager.hpp"
+#include "SpriteBatch.hpp"
+#include "TextureAtlas.hpp"
 #include "TextureManager.hpp"
 
 const unsigned int WIDTH = 1920;
@@ -47,37 +49,64 @@ int main() {
         TextureManager texMgr;
         texMgr.LoadTextures("./assets");
 
-        Shader shader;
-        shader.CompileAndLink("shaders/vertex.glsl", "shaders/fragment.glsl");
+        ShaderManager shaderMgr;
+        shaderMgr.LoadShaders("./shaders");
 
-        Framebuffer fb(INTERNAL_WIDTH, INTERNAL_HEIGHT, shader);
+        TextureAtlas sprites(192, 64);
+        sprites.SetTexture(texMgr, "sprites");
+        sprites.Add("moon", 0, 0, 64, 64);
+        sprites.Add("star_00", 64, 0, 64, 64);
+        sprites.Add("star_01", 128, 0, 64, 64);
+
+        const auto& spriteShader = shaderMgr.Get("sprite_batch");
+        const auto& layerShader = shaderMgr.Get("layer");
+
+        SpriteBatch batch(sprites, spriteShader);
+        batch.Init();
+
+        Framebuffer fb(INTERNAL_WIDTH, INTERNAL_HEIGHT, layerShader);
         fb.Init();
 
         Quad quad;
         quad.Create();
 
         std::vector<Layer> layers = {
-            Layer{ { texMgr.Get("background") }, shader, 0.05f },
-            Layer{ { texMgr.Get("midground") }, shader, 0.10f },
-            Layer{ { texMgr.Get("foreground3") }, shader, 0.15f },
-            Layer{ { texMgr.Get("foreground2") }, shader, 0.20f },
-            Layer{ { texMgr.Get("foreground") }, shader, 0.35f },
+            Layer{ { texMgr.Get("background") }, layerShader, 0.05f },
+            Layer{ { texMgr.Get("midground") }, layerShader, 0.10f },
+            Layer{ { texMgr.Get("foreground3") }, layerShader, 0.15f },
+            Layer{ { texMgr.Get("foreground2") }, layerShader, 0.20f },
+            Layer{ { texMgr.Get("foreground") }, layerShader, 0.35f },
         };
 
-        float lastTime = glfwGetTime();
+        auto lastTime = glfwGetTime();
 
         while (!glfwWindowShouldClose(window)) {
-            float currentTime = glfwGetTime();
-            float delta = currentTime - lastTime;
+            auto currentTime = glfwGetTime();
+            auto delta = currentTime - lastTime;
             lastTime = currentTime;
 
             fb.Use();
-            for (auto& layer : layers) {
-                layer.Render(INTERNAL_WIDTH, INTERNAL_HEIGHT, quad);
+
+            batch.Begin();
+            batch.Draw("moon", 0.5f, 0.8f, 0.06f, 0.1f);
+            batch.Draw("star_00", 0.85f, 0.6f, 0.03f, 0.05f);
+            batch.Draw("star_00", 0.6f, 0.75f, 0.03f, 0.05f);
+            batch.Draw("star_00", 0.4f, 0.5f, 0.03f, 0.05f);
+            batch.Draw("star_00", 0.3f, 0.6f, 0.03f, 0.05f);
+            batch.Draw("star_00", 0.1f, 0.8f, 0.03f, 0.05f);
+            batch.Draw("star_01", 0.8f, 0.7f, 0.03f, 0.05f);
+            batch.Draw("star_01", 0.7f, 0.6f, 0.03f, 0.05f);
+            batch.Draw("star_01", 0.35f, 0.50f, 0.03f, 0.05f);
+            batch.Draw("star_01", 0.25f, 0.65f, 0.03f, 0.05f);
+            batch.Draw("star_01", 0.15f, 0.75f, 0.03f, 0.05f);
+            batch.Flush(INTERNAL_WIDTH, INTERNAL_HEIGHT);
+
+            for (auto i = 0lu; i < layers.size(); ++i) {
+                layers[i].Render(INTERNAL_WIDTH, INTERNAL_HEIGHT, quad);
             }
 
             for (auto& layer : layers) {
-                layer.Update(delta);
+                layer.Update(static_cast<float>(delta));
             }
 
             int winW, winH;

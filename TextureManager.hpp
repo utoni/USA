@@ -1,19 +1,18 @@
 #pragma once
 
-#include "Texture.hpp"
 #include "Optimization.hpp"
+#include "Texture.hpp"
 
 #include <filesystem>
-#include <unordered_map>
 #include <stdexcept>
 #include <string>
+#include <unordered_map>
 
 class TextureManager
 {
 public:
     explicit TextureManager()
     {}
-    ~TextureManager() {}
 
     void LoadTextures(const std::filesystem::path& textureRoot);
     [[nodiscard]]
@@ -25,7 +24,7 @@ public:
     }
 
 private:
-    std::unordered_map<const std::string, Texture,
+    std::unordered_map<const std::string, const Texture,
                        Optimization::TransparentHash,
                        Optimization::TransparentEqual> Textures;
 };

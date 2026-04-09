@@ -2,20 +2,20 @@
 
 #include "glad.h"
 
+#include <array>
+
 Quad::~Quad()
 {
-    using IdType = decltype(VBO);
-
-    if (VBO != static_cast<IdType>(-1))
+    if (VBO != 0)
         glDeleteBuffers(1, &VBO);
 
-    if (VAO != static_cast<IdType>(-1))
+    if (VAO != 0)
         glDeleteVertexArrays(1, &VAO);
 }
 
 void Quad::Create()
 {
-    float quadVertices[] = {
+    constexpr std::array<float, 24> quadVertices = {
         // positions            // texCoords
         0.0f, 1.0f,     0.0f, 1.0f,
         0.0f, 0.0f,     0.0f, 0.0f,
@@ -29,7 +29,7 @@ void Quad::Create()
     glGenBuffers(1, &VBO);
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices.data(), GL_STATIC_DRAW);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), nullptr);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float),

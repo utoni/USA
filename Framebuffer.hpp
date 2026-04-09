@@ -6,15 +6,15 @@
 class Framebuffer
 {
 public:
-    explicit Framebuffer(unsigned int width,
-                         unsigned int height,
-                         Shader& shader)
+    explicit Framebuffer(int width,
+                         int height,
+                         const Shader& shader)
         : Width(width), Height(height), FboShader(shader)
-    {
-        Locations.Offset = shader.GetUniformLocation("offset");
-        Locations.Texture = shader.GetUniformLocation("tex");
-        Locations.MVP = shader.GetUniformLocation("mvp");
-    }
+    {}
+    Framebuffer(const Framebuffer &) = delete;
+    Framebuffer(Framebuffer &&) = delete;
+    Framebuffer& operator=(const Framebuffer &) = delete;
+    Framebuffer& operator=(Framebuffer&&) = delete;
     ~Framebuffer();
 
     void Init();
@@ -27,14 +27,14 @@ private:
     void SetAspectRatio(int glfwWidth, int glfwHeight) const;
     void EndFrame() const;
 
-    unsigned int Width;
-    unsigned int Height;
-    Shader& FboShader;
+    int Width;
+    int Height;
+    const Shader& FboShader;
     struct {
-        int Offset;
-        int Texture;
-        int MVP;
+        int UvOffset = -1;
+        int UvScale = -1;
+        int MVP = -1;
     } Locations;
-    unsigned int FboID = -1;
-    unsigned int FboTextureID = -1;
+    unsigned int FboID = 0;
+    unsigned int FboTextureID = 0;
 };

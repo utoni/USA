@@ -6,22 +6,34 @@
 
 Shader::~Shader()
 {
-    using IdType = decltype(VertexShaderID);
-
-    if (VertexShaderID != static_cast<IdType>(-1))
+    if (VertexShaderID != 0)
         glDeleteShader(VertexShaderID);
 
-    if (FragmentShaderID != static_cast<IdType>(-1))
+    if (FragmentShaderID != 0)
         glDeleteShader(FragmentShaderID);
 
-    if (ShaderID != static_cast<IdType>(-1))
+    if (ShaderID != 0)
         glDeleteProgram(ShaderID);
 }
 
-void Shader::CompileAndLink(const std::string& vs_path, const std::string& fs_path)
+Shader::Shader(Shader&& other) noexcept
 {
-    const auto vsSource = LoadFromFile(vs_path);
-    const auto fsSource = LoadFromFile(fs_path);
+    VertexShaderID = other.VertexShaderID;
+    FragmentShaderID = other.FragmentShaderID;
+    ShaderID = other.ShaderID;
+    UniformLocations = std::move(other.UniformLocations);
+
+    other.VertexShaderID = 0;
+    other.FragmentShaderID = 0;
+    other.ShaderID = 0;
+    other.UniformLocations.clear();
+}
+
+void Shader::CompileAndLink(const std::filesystem::path& vertexPath,
+                            const std::filesystem::path& fragmentPath)
+{
+    const auto vsSource = LoadFromFile(vertexPath);
+    const auto fsSource = LoadFromFile(fragmentPath);
 
     unsigned int vs = Compile(GL_VERTEX_SHADER, vsSource);
     unsigned int fs = Compile(GL_FRAGMENT_SHADER, fsSource);
@@ -36,7 +48,7 @@ void Shader::CompileAndLink(const std::string& vs_path, const std::string& fs_pa
         std::array<char, 512> infoLog = {};
         glGetProgramInfoLog(shader, std::size(infoLog), nullptr, std::data(infoLog));
         std::stringstream ss;
-        ss << "Shader Linker Error: " << std::data(infoLog) << "\n";
+        ss << "Shader Linker Error: " << std::data(infoLog);
         throw std::runtime_error(ss.str());
     }
 
@@ -47,20 +59,13 @@ void Shader::CompileAndLink(const std::string& vs_path, const std::string& fs_pa
     InitUniforms();
 }
 
-Shader::DefaultLocations Shader::GetDefaultLocations() const
-{
-    Shader::DefaultLocations defLocs;
-
-    defLocs.Offset = GetUniformLocation("offset");
-    defLocs.Texture = GetUniformLocation("tex");
-    defLocs.MVP = GetUniformLocation("mvp");
-    return defLocs;
-}
-
 std::string Shader::LoadFromFile(const std::string& path)
 {
     std::ifstream file(path);
     std::stringstream ss;
+
+    if (!file.is_open() || file.bad())
+        throw std::runtime_error("Loading Shader Error: Could not open/read file(s)");
     ss << file.rdbuf();
     return ss.str();
 }
@@ -79,10 +84,18 @@ unsigned int Shader::Compile(unsigned int type, const std::string& source)
         std::array<char, 512> infoLog = {};
         glGetShaderInfoLog(shader, std::size(infoLog), nullptr, std::data(infoLog));
         std::stringstream ss;
-        ss << "Shader Compilation Error: " << std::data(infoLog) << "\n";
+        ss << "Shader Compilation Error: " << std::data(infoLog);
         throw std::runtime_error(ss.str());
     }
 
+    return shader;
+}
+
+Shader Shader::Create(const std::filesystem::path& vertexShader,
+                      const std::filesystem::path& fragmentShader)
+{
+    Shader shader;
+    shader.CompileAndLink(vertexShader, fragmentShader);
     return shader;
 }
 

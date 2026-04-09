@@ -9,7 +9,7 @@ public:
     ~Texture() {}
     Texture(Texture&& other) noexcept {
         TextureID = other.TextureID;
-        other.TextureID = -1;
+        other.TextureID = 0;
     }
     Texture& operator=(Texture&& other) noexcept  = delete;
     Texture(const Texture&) = delete;
@@ -23,5 +23,5 @@ public:
     static Texture Create(const std::filesystem::path& path);
 
 private:
-    unsigned int TextureID = -1;
+    unsigned int TextureID = 0;
 };
