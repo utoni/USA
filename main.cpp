@@ -60,11 +60,12 @@ int main() {
 
         const auto& spriteShader = shaderMgr.Get("sprite_batch");
         const auto& layerShader = shaderMgr.Get("layer");
+        const auto& fbShader = shaderMgr.Get("framebuffer");
 
         SpriteBatch batch(sprites, spriteShader);
         batch.Init();
 
-        Framebuffer fb(INTERNAL_WIDTH, INTERNAL_HEIGHT, layerShader);
+        Framebuffer fb(INTERNAL_WIDTH, INTERNAL_HEIGHT, fbShader);
         fb.Init();
 
         Quad quad;

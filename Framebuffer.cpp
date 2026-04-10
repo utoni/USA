@@ -19,8 +19,6 @@ Framebuffer::~Framebuffer()
 
 void Framebuffer::Init()
 {
-    Locations.UvOffset = FboShader.GetUniformLocation("uvOffset");
-    Locations.UvScale = FboShader.GetUniformLocation("uvScale");
     Locations.MVP = FboShader.GetUniformLocation("mvp");
 
     glGenFramebuffers(1, &FboID);
@@ -124,8 +122,6 @@ void Framebuffer::RenderToScreen(Quad& quad, int width, int height) const
     glm::mat4 mvp = projection * model;
 
     FboShader.Use();
-    FboShader.SetUniform(Locations.UvOffset, 0.0f, 0.0f);
-    FboShader.SetUniform(Locations.UvScale, 1.0f, 1.0f);
     FboShader.SetUniform(Locations.MVP, glm::value_ptr(mvp));
 
     EndFrame();

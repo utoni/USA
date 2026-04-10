@@ -31,8 +31,6 @@ private:
     int Height;
     const Shader& FboShader;
     struct {
-        int UvOffset = -1;
-        int UvScale = -1;
         int MVP = -1;
     } Locations;
     unsigned int FboID = 0;

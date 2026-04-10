@@ -8,6 +8,15 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <math.h>
 
+SpriteBatch::~SpriteBatch()
+{
+    if (VBO != 0)
+        glDeleteBuffers(1, &VBO);
+
+    if (VAO != 0)
+        glDeleteVertexArrays(1, &VAO);
+}
+
 void SpriteBatch::Init()
 {
     Locations.MVP = SpriteShader.GetUniformLocation("mvp");

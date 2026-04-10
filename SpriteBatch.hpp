@@ -25,6 +25,11 @@ public:
     {
         Vertices.reserve(maxSprites * 6);
     }
+    SpriteBatch(const SpriteBatch&) = delete;
+    SpriteBatch(SpriteBatch&&) = delete;
+    SpriteBatch& operator=(const SpriteBatch&) = delete;
+    SpriteBatch& operator=(SpriteBatch&&) = delete;
+    ~SpriteBatch();
 
     void Init();
     void Begin()

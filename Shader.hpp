@@ -30,6 +30,11 @@ public:
     void SetUniform(int location, GLfloat value0f, GLfloat value1f) const {
         return glUniform2f(location, value0f, value1f);
     }
+    void SetUniform(int location, GLfloat value0f, GLfloat value1f,
+                    GLfloat value2f, GLfloat value3f) const
+    {
+        return glUniform4f(location, value0f, value1f, value2f, value3f);
+    }
     void SetUniform(int location, const GLfloat* value4fv) const {
         return glUniformMatrix4fv(location, 1, GL_FALSE, value4fv);
     }
