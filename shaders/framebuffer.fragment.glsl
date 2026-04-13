@@ -42,11 +42,13 @@ vec2 getLightSourceUV()
     vec2 dir = moonDirection;
     float dirLen = length(dir);
     if (dirLen <= 0.0001)
+        // Fallback to a vertical moonlight direction when direction is invalid.
         dir = vec2(0.0, -1.0);
     else
         dir /= dirLen;
 
     // Convert directional moonlight into an off-screen source point.
+    // 0.85 keeps the source just outside the screen so shafts look natural.
     return vec2(0.5, 0.5) - dir * 0.85;
 }
 
@@ -56,7 +58,9 @@ float getOcclusionMask(vec2 uv, vec2 sourceUV)
         return 0.0;
 
     vec3 color = texture(tex, uv).rgb;
+    // Luminance thresholds selecting brighter pixels as godray contributors.
     float bright = smoothstep(0.22, 0.95, luminance(color));
+    // Distance falloff from source to keep rays localized and pixel-art friendly.
     float sourceFalloff = 1.0 - clamp(length(uv - sourceUV) * 1.35, 0.0, 1.0);
     return bright * sourceFalloff;
 }
@@ -89,6 +93,7 @@ void main()
 
     float dither = (hash(gl_FragCoord.xy + vec2(timeSeconds * 17.0)) - 0.5) * godraysNoiseAmount;
     rays *= godraysExposure * godraysIntensity;
+    // Keep dithering subtle to avoid overpowering sprite details.
     rays += dither * godraysColor * 0.15;
 
     if (showGodraysMask != 0) {

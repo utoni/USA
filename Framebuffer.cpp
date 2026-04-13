@@ -185,8 +185,9 @@ void Framebuffer::SetMoonSourcePosition(float normalizedX, float normalizedY)
 
 void Framebuffer::SetMoonDirection(float normalizedX, float normalizedY)
 {
-    const auto length = std::hypot(normalizedX, normalizedY);
-    if (length <= 0.0f)
+    constexpr float kDirectionEpsilon = 0.0001f;
+    const auto length = std::sqrt(normalizedX * normalizedX + normalizedY * normalizedY);
+    if (length <= kDirectionEpsilon)
         return;
 
     MoonDirection.x = normalizedX / length;
