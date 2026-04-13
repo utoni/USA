@@ -81,7 +81,7 @@ private:
     bool ShowGodraysMaskDebug = false;
     GodraysSourceMode SourceMode = GodraysSourceMode::MoonSprite;
     glm::vec2 MoonSourcePosition = {0.53f, 0.85f};
-    glm::vec2 MoonDirection = {-0.35f, -1.0f};
+    glm::vec2 MoonDirection = {-0.25f, -1.0f};
     unsigned int FboID = 0;
     unsigned int FboTextureID = 0;
 };

@@ -185,7 +185,7 @@ void Framebuffer::SetMoonSourcePosition(float normalizedX, float normalizedY)
 
 void Framebuffer::SetMoonDirection(float normalizedX, float normalizedY)
 {
-    const auto length = std::sqrt(normalizedX * normalizedX + normalizedY * normalizedY);
+    const auto length = std::hypot(normalizedX, normalizedY);
     if (length <= 0.0f)
         return;
 
