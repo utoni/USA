@@ -24,6 +24,7 @@ uniform float timeSeconds;
 
 const int MAX_GODRAY_SAMPLES = 96;
 const int MAX_GODRAY_LIGHT_SOURCES = 16;
+const int MAX_GODRAY_SOURCES_PER_PIXEL = 4;
 
 float hash(vec2 p)
 {
@@ -106,10 +107,14 @@ void main()
             rays += sampleRaysFromSource(moonScreenPos, sampleCount);
             maskDebugSourceUV = moonScreenPos;
         } else {
+            int processedSourceCount = min(sourceCount, MAX_GODRAY_SOURCES_PER_PIXEL);
+            int perSourceSampleCount = max(1, sampleCount / processedSourceCount);
+            float perSourceWeight = 1.0 / float(processedSourceCount);
+
             for (int i = 0; i < MAX_GODRAY_LIGHT_SOURCES; ++i) {
-                if (i >= sourceCount)
+                if (i >= processedSourceCount)
                     break;
-                rays += sampleRaysFromSource(godraysLightPositions[i], sampleCount);
+                rays += sampleRaysFromSource(godraysLightPositions[i], perSourceSampleCount) * perSourceWeight;
             }
             maskDebugSourceUV = godraysLightPositions[0];
         }
