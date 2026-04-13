@@ -20,6 +20,8 @@ The fullscreen framebuffer pass now includes a pixel-art friendly moon godrays e
 In moon sprite mode, multiple emitters can be configured (moon + stars) via
 `Framebuffer::AddGodraysLightSource(...)`.
 
+![Moon godrays with multi-source emitters](assets/moon-godrays-multi-source.png)
+
 ### Tuning
 
 Godrays parameters live in `Framebuffer.hpp` inside `GodraysParameters`:
