@@ -107,7 +107,8 @@ void main()
             rays += sampleRaysFromSource(moonScreenPos, sampleCount);
             maskDebugSourceUV = moonScreenPos;
         } else {
-            int processedSourceCount = min(sourceCount, min(MAX_GODRAY_SOURCES_PER_PIXEL, sampleCount));
+            int cappedSourceCount = min(sourceCount, MAX_GODRAY_SOURCES_PER_PIXEL);
+            int processedSourceCount = min(cappedSourceCount, sampleCount);
             if (processedSourceCount > 0) {
                 int perSourceSampleCount = max(1, sampleCount / processedSourceCount);
                 int remainingSamples = sampleCount - (perSourceSampleCount * processedSourceCount);
@@ -121,8 +122,7 @@ void main()
                         remainingSamples -= 1;
                     }
 
-                    float sourceWeight = float(sourceSamples) / float(sampleCount);
-                    rays += sampleRaysFromSource(godraysLightPositions[i], sourceSamples) * sourceWeight;
+                    rays += sampleRaysFromSource(godraysLightPositions[i], sourceSamples);
                 }
             }
             maskDebugSourceUV = godraysLightPositions[0];
