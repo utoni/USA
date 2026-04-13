@@ -23,6 +23,7 @@ uniform float godraysNoiseAmount;
 uniform float timeSeconds;
 
 const int MAX_GODRAY_SAMPLES = 96;
+const int MAX_GODRAY_LIGHT_SOURCES = 16;
 
 float hash(vec2 p)
 {
@@ -97,25 +98,25 @@ void main()
 
     int sampleCount = clamp(godraysSamples, 1, MAX_GODRAY_SAMPLES);
     vec3 rays = vec3(0.0);
-    vec2 debugSourceUV = moonScreenPos;
+    vec2 maskDebugSourceUV = vec2(0.0);
 
     if (godraysSourceMode == 0) {
-        int sourceCount = clamp(godraysLightCount, 0, 16);
+        int sourceCount = clamp(godraysLightCount, 0, MAX_GODRAY_LIGHT_SOURCES);
         if (sourceCount == 0) {
             rays += sampleRaysFromSource(moonScreenPos, sampleCount);
-            debugSourceUV = moonScreenPos;
+            maskDebugSourceUV = moonScreenPos;
         } else {
-            for (int i = 0; i < 16; ++i) {
+            for (int i = 0; i < MAX_GODRAY_LIGHT_SOURCES; ++i) {
                 if (i >= sourceCount)
                     break;
                 rays += sampleRaysFromSource(godraysLightPositions[i], sampleCount);
             }
-            debugSourceUV = godraysLightPositions[0];
+            maskDebugSourceUV = godraysLightPositions[0];
         }
     } else {
         vec2 sourceUV = getLightSourceUV();
         rays += sampleRaysFromSource(sourceUV, sampleCount);
-        debugSourceUV = sourceUV;
+        maskDebugSourceUV = sourceUV;
     }
 
     float dither = (hash(gl_FragCoord.xy + vec2(timeSeconds * 17.0)) - 0.5) * godraysNoiseAmount;
@@ -124,7 +125,7 @@ void main()
     rays += dither * godraysColor * 0.15;
 
     if (showGodraysMask != 0) {
-        float mask = getOcclusionMask(TexCoord, debugSourceUV);
+        float mask = getOcclusionMask(TexCoord, maskDebugSourceUV);
         FragColor = vec4(vec3(mask), 1.0);
         return;
     }
