@@ -110,7 +110,7 @@ void main()
             int processedSourceCount = min(sourceCount, MAX_GODRAY_SOURCES_PER_PIXEL);
             if (processedSourceCount > 0) {
                 int perSourceSampleCount = max(1, sampleCount / processedSourceCount);
-                int remainingSamples = sampleCount - (perSourceSampleCount * processedSourceCount);
+                int remainingSamples = max(0, sampleCount - (perSourceSampleCount * processedSourceCount));
                 float perSourceWeight = 1.0 / float(processedSourceCount);
 
                 for (int i = 0; i < MAX_GODRAY_LIGHT_SOURCES; ++i) {
