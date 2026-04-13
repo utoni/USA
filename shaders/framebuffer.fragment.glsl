@@ -108,13 +108,12 @@ void main()
             maskDebugSourceUV = moonScreenPos;
         } else {
             int cappedSourceCount = min(sourceCount, MAX_GODRAY_SOURCES_PER_PIXEL);
-            int processedSourceCount = cappedSourceCount;
-            if (processedSourceCount > 0) {
-                int perSourceSampleCount = sampleCount / processedSourceCount;
-                int remainingSamples = sampleCount % processedSourceCount;
+            if (cappedSourceCount > 0) {
+                int perSourceSampleCount = sampleCount / cappedSourceCount;
+                int remainingSamples = sampleCount % cappedSourceCount;
 
                 for (int i = 0; i < MAX_GODRAY_LIGHT_SOURCES; ++i) {
-                    if (i >= processedSourceCount)
+                    if (i >= cappedSourceCount)
                         break;
                     int sourceSamples = perSourceSampleCount;
                     if (remainingSamples > 0) {
