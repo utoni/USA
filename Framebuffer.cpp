@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <algorithm>
 #include <cmath>
 #include <stdexcept>
 
@@ -26,6 +27,8 @@ void Framebuffer::Init()
     Locations.GodraysSourceMode = FboShader.GetUniformLocation("godraysSourceMode");
     Locations.MoonSourcePosition = FboShader.GetUniformLocation("moonScreenPos");
     Locations.MoonDirection = FboShader.GetUniformLocation("moonDirection");
+    Locations.GodraysLightCount = FboShader.GetUniformLocation("godraysLightCount");
+    Locations.GodraysLightPositions = FboShader.GetUniformLocation("godraysLightPositions[0]");
     Locations.GodraysIntensity = FboShader.GetUniformLocation("godraysIntensity");
     Locations.GodraysExposure = FboShader.GetUniformLocation("godraysExposure");
     Locations.GodraysDecay = FboShader.GetUniformLocation("godraysDecay");
@@ -145,6 +148,11 @@ void Framebuffer::RenderToScreen(Quad& quad, int width, int height, float timeSe
                          MoonSourcePosition.x, MoonSourcePosition.y);
     FboShader.SetUniform(Locations.MoonDirection,
                          MoonDirection.x, MoonDirection.y);
+    FboShader.SetUniform(Locations.GodraysLightCount, GodraysLightCount);
+    if (GodraysLightCount > 0) {
+        glUniform2fv(Locations.GodraysLightPositions, GodraysLightCount,
+                     reinterpret_cast<const float*>(GodraysLightSources.data()));
+    }
     FboShader.SetUniform(Locations.GodraysIntensity, Godrays.Intensity);
     FboShader.SetUniform(Locations.GodraysExposure, Godrays.Exposure);
     FboShader.SetUniform(Locations.GodraysDecay, Godrays.Decay);
@@ -192,4 +200,19 @@ void Framebuffer::SetMoonDirection(float normalizedX, float normalizedY)
 
     MoonDirection.x = normalizedX / length;
     MoonDirection.y = normalizedY / length;
+}
+
+void Framebuffer::ClearGodraysLightSources()
+{
+    GodraysLightCount = 0;
+}
+
+void Framebuffer::AddGodraysLightSource(float normalizedX, float normalizedY)
+{
+    if (GodraysLightCount >= MaxGodraysLightSources)
+        return;
+
+    GodraysLightSources[GodraysLightCount].x = std::clamp(normalizedX, 0.0f, 1.0f);
+    GodraysLightSources[GodraysLightCount].y = std::clamp(normalizedY, 0.0f, 1.0f);
+    ++GodraysLightCount;
 }

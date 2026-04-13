@@ -13,9 +13,12 @@ The fullscreen framebuffer pass now includes a pixel-art friendly moon godrays e
 
 - `G` toggles godrays on/off.
 - `M` switches source mode:
-  - `Moon sprite source` (uses the moon screen position)
+  - `Moon sprite source` (uses configured screen-space light source positions)
   - `Directional off-screen source` (uses a normalized moonlight direction)
 - `B` toggles debug mask visualization (shows the sampled occlusion mask).
+
+In moon sprite mode, multiple emitters can be configured (moon + stars) via
+`Framebuffer::AddGodraysLightSource(...)`.
 
 ### Tuning
 

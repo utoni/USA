@@ -69,6 +69,18 @@ int main() {
         fb.Init();
         fb.SetMoonSourcePosition(0.53f, 0.85f); // Sprite center in normalized screen-space.
         fb.SetMoonDirection(-0.25f, -1.0f);     // Off-screen moonlight direction.
+        fb.ClearGodraysLightSources();
+        fb.AddGodraysLightSource(0.53f, 0.85f);  // Moon
+        fb.AddGodraysLightSource(0.865f, 0.625f);
+        fb.AddGodraysLightSource(0.615f, 0.775f);
+        fb.AddGodraysLightSource(0.415f, 0.525f);
+        fb.AddGodraysLightSource(0.315f, 0.625f);
+        fb.AddGodraysLightSource(0.115f, 0.825f);
+        fb.AddGodraysLightSource(0.815f, 0.725f);
+        fb.AddGodraysLightSource(0.715f, 0.625f);
+        fb.AddGodraysLightSource(0.365f, 0.525f);
+        fb.AddGodraysLightSource(0.265f, 0.675f);
+        fb.AddGodraysLightSource(0.165f, 0.775f);
 
         Quad quad;
         quad.Create();

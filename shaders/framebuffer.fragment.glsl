@@ -8,6 +8,8 @@ uniform int showGodraysMask;
 uniform int godraysSourceMode; // 0 = moon sprite source, 1 = directional off-screen source
 uniform vec2 moonScreenPos;    // normalized screen-space source position
 uniform vec2 moonDirection;    // normalized light direction for directional mode
+uniform int godraysLightCount;
+uniform vec2 godraysLightPositions[16];
 
 // Godray tuning parameters:
 uniform float godraysIntensity;
@@ -65,21 +67,12 @@ float getOcclusionMask(vec2 uv, vec2 sourceUV)
     return bright * sourceFalloff;
 }
 
-void main()
+vec3 sampleRaysFromSource(vec2 sourceUV, int sampleCount)
 {
-    vec4 scene = texture(tex, TexCoord);
-    if (enableGodrays == 0) {
-        FragColor = scene;
-        return;
-    }
-
-    vec2 sourceUV = getLightSourceUV();
-    vec2 delta = (TexCoord - sourceUV) * (godraysDensity / float(max(godraysSamples, 1)));
-
+    vec2 delta = (TexCoord - sourceUV) * (godraysDensity / float(sampleCount));
     vec3 rays = vec3(0.0);
     float illuminationDecay = 1.0;
     vec2 sampleUV = TexCoord;
-    int sampleCount = clamp(godraysSamples, 1, MAX_GODRAY_SAMPLES);
 
     for (int i = 0; i < MAX_GODRAY_SAMPLES; ++i) {
         if (i >= sampleCount)
@@ -91,13 +84,47 @@ void main()
         illuminationDecay *= godraysDecay;
     }
 
+    return rays;
+}
+
+void main()
+{
+    vec4 scene = texture(tex, TexCoord);
+    if (enableGodrays == 0) {
+        FragColor = scene;
+        return;
+    }
+
+    int sampleCount = clamp(godraysSamples, 1, MAX_GODRAY_SAMPLES);
+    vec3 rays = vec3(0.0);
+    vec2 debugSourceUV = moonScreenPos;
+
+    if (godraysSourceMode == 0) {
+        int sourceCount = clamp(godraysLightCount, 0, 16);
+        if (sourceCount == 0) {
+            rays += sampleRaysFromSource(moonScreenPos, sampleCount);
+            debugSourceUV = moonScreenPos;
+        } else {
+            for (int i = 0; i < 16; ++i) {
+                if (i >= sourceCount)
+                    break;
+                rays += sampleRaysFromSource(godraysLightPositions[i], sampleCount);
+            }
+            debugSourceUV = godraysLightPositions[0];
+        }
+    } else {
+        vec2 sourceUV = getLightSourceUV();
+        rays += sampleRaysFromSource(sourceUV, sampleCount);
+        debugSourceUV = sourceUV;
+    }
+
     float dither = (hash(gl_FragCoord.xy + vec2(timeSeconds * 17.0)) - 0.5) * godraysNoiseAmount;
     rays *= godraysExposure * godraysIntensity;
     // Keep dithering subtle to avoid overpowering sprite details.
     rays += dither * godraysColor * 0.15;
 
     if (showGodraysMask != 0) {
-        float mask = getOcclusionMask(TexCoord, sourceUV);
+        float mask = getOcclusionMask(TexCoord, debugSourceUV);
         FragColor = vec4(vec3(mask), 1.0);
         return;
     }

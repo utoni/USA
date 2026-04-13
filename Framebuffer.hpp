@@ -3,12 +3,15 @@
 #include "Quad.hpp"
 #include "Shader.hpp"
 
+#include <array>
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 
 class Framebuffer
 {
 public:
+    static constexpr int MaxGodraysLightSources = 16;
+
     enum class GodraysSourceMode {
         MoonSprite = 0,
         Directional = 1
@@ -35,6 +38,8 @@ public:
     void ToggleGodraysSourceMode();
     void SetMoonSourcePosition(float normalizedX, float normalizedY);
     void SetMoonDirection(float normalizedX, float normalizedY);
+    void ClearGodraysLightSources();
+    void AddGodraysLightSource(float normalizedX, float normalizedY);
     [[nodiscard]]
     bool IsGodraysEnabled() const { return GodraysEnabled; }
     [[nodiscard]]
@@ -56,6 +61,8 @@ private:
         int GodraysSourceMode = -1;
         int MoonSourcePosition = -1;
         int MoonDirection = -1;
+        int GodraysLightCount = -1;
+        int GodraysLightPositions = -1;
         int GodraysIntensity = -1;
         int GodraysExposure = -1;
         int GodraysDecay = -1;
@@ -82,6 +89,8 @@ private:
     GodraysSourceMode SourceMode = GodraysSourceMode::MoonSprite;
     glm::vec2 MoonSourcePosition = {0.53f, 0.85f};
     glm::vec2 MoonDirection = {-0.25f, -1.0f};
+    int GodraysLightCount = 0;
+    std::array<glm::vec2, MaxGodraysLightSources> GodraysLightSources = {};
     unsigned int FboID = 0;
     unsigned int FboTextureID = 0;
 };
