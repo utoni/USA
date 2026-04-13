@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <cmath>
 #include <stdexcept>
 
 Framebuffer::~Framebuffer()
@@ -20,6 +21,20 @@ Framebuffer::~Framebuffer()
 void Framebuffer::Init()
 {
     Locations.MVP = FboShader.GetUniformLocation("mvp");
+    Locations.GodraysEnabled = FboShader.GetUniformLocation("enableGodrays");
+    Locations.ShowGodraysMaskDebug = FboShader.GetUniformLocation("showGodraysMask");
+    Locations.GodraysSourceMode = FboShader.GetUniformLocation("godraysSourceMode");
+    Locations.MoonSourcePosition = FboShader.GetUniformLocation("moonScreenPos");
+    Locations.MoonDirection = FboShader.GetUniformLocation("moonDirection");
+    Locations.GodraysIntensity = FboShader.GetUniformLocation("godraysIntensity");
+    Locations.GodraysExposure = FboShader.GetUniformLocation("godraysExposure");
+    Locations.GodraysDecay = FboShader.GetUniformLocation("godraysDecay");
+    Locations.GodraysDensity = FboShader.GetUniformLocation("godraysDensity");
+    Locations.GodraysWeight = FboShader.GetUniformLocation("godraysWeight");
+    Locations.GodraysSamples = FboShader.GetUniformLocation("godraysSamples");
+    Locations.GodraysColor = FboShader.GetUniformLocation("godraysColor");
+    Locations.GodraysNoiseAmount = FboShader.GetUniformLocation("godraysNoiseAmount");
+    Locations.TimeSeconds = FboShader.GetUniformLocation("timeSeconds");
 
     glGenFramebuffers(1, &FboID);
     glBindFramebuffer(GL_FRAMEBUFFER, FboID);
@@ -105,7 +120,7 @@ void Framebuffer::EndFrame() const
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
-void Framebuffer::RenderToScreen(Quad& quad, int width, int height) const
+void Framebuffer::RenderToScreen(Quad& quad, int width, int height, float timeSeconds) const
 {
     BeginFrame(quad);
 
@@ -123,6 +138,57 @@ void Framebuffer::RenderToScreen(Quad& quad, int width, int height) const
 
     FboShader.Use();
     FboShader.SetUniform(Locations.MVP, glm::value_ptr(mvp));
+    FboShader.SetUniform(Locations.GodraysEnabled, static_cast<int>(GodraysEnabled));
+    FboShader.SetUniform(Locations.ShowGodraysMaskDebug, static_cast<int>(ShowGodraysMaskDebug));
+    FboShader.SetUniform(Locations.GodraysSourceMode, static_cast<int>(SourceMode));
+    FboShader.SetUniform(Locations.MoonSourcePosition,
+                         MoonSourcePosition.x, MoonSourcePosition.y);
+    FboShader.SetUniform(Locations.MoonDirection,
+                         MoonDirection.x, MoonDirection.y);
+    FboShader.SetUniform(Locations.GodraysIntensity, Godrays.Intensity);
+    FboShader.SetUniform(Locations.GodraysExposure, Godrays.Exposure);
+    FboShader.SetUniform(Locations.GodraysDecay, Godrays.Decay);
+    FboShader.SetUniform(Locations.GodraysDensity, Godrays.Density);
+    FboShader.SetUniform(Locations.GodraysWeight, Godrays.Weight);
+    FboShader.SetUniform(Locations.GodraysSamples, Godrays.Samples);
+    FboShader.SetUniform(Locations.GodraysColor,
+                         Godrays.Color.x, Godrays.Color.y, Godrays.Color.z);
+    FboShader.SetUniform(Locations.GodraysNoiseAmount, Godrays.NoiseAmount);
+    FboShader.SetUniform(Locations.TimeSeconds, timeSeconds);
 
     EndFrame();
+}
+
+void Framebuffer::ToggleGodrays()
+{
+    GodraysEnabled = !GodraysEnabled;
+}
+
+void Framebuffer::ToggleGodraysMaskDebug()
+{
+    ShowGodraysMaskDebug = !ShowGodraysMaskDebug;
+}
+
+void Framebuffer::ToggleGodraysSourceMode()
+{
+    if (SourceMode == GodraysSourceMode::MoonSprite)
+        SourceMode = GodraysSourceMode::Directional;
+    else
+        SourceMode = GodraysSourceMode::MoonSprite;
+}
+
+void Framebuffer::SetMoonSourcePosition(float normalizedX, float normalizedY)
+{
+    MoonSourcePosition.x = normalizedX;
+    MoonSourcePosition.y = normalizedY;
+}
+
+void Framebuffer::SetMoonDirection(float normalizedX, float normalizedY)
+{
+    const auto length = std::sqrt(normalizedX * normalizedX + normalizedY * normalizedY);
+    if (length <= 0.0f)
+        return;
+
+    MoonDirection.x = normalizedX / length;
+    MoonDirection.y = normalizedY / length;
 }
