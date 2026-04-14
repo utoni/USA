@@ -77,10 +77,10 @@ private:
         // Pixel-art friendly defaults (low sample count + subtle cool tint + tiny dithering).
         float Intensity = 0.55f;
         float Exposure = 0.24f;
-        float Decay = 0.96f;
-        float Density = 0.82f;
+        float Decay = 0.95f;
+        float Density = 0.70f;
         float Weight = 0.7f;
-        int Samples = 36;
+        int Samples = 64;
         glm::vec3 Color = {0.62f, 0.72f, 0.95f};
         float NoiseAmount = 0.035f;
     } Godrays;
