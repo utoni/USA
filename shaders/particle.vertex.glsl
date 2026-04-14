@@ -2,10 +2,10 @@
 layout (location = 0) in vec2 aPos;
 layout (location = 1) in vec2 aUV;
 layout (location = 2) in vec4 aColor;
+uniform mat4 mvp;
 
 out vec2 TexCoord;
 out vec4 ParticleColor;
-uniform mat4 mvp;
 
 void main()
 {

@@ -15,6 +15,14 @@
 namespace
 {
 constexpr float Tau = 6.28318530718f;
+constexpr float LeafHalfWidth = 0.245f;
+constexpr float LeafHalfHeight = 0.447f;
+constexpr std::uint8_t LeafBaseRed = 190;
+constexpr std::uint8_t LeafRedTint = 40;
+constexpr std::uint8_t LeafBaseGreen = 90;
+constexpr std::uint8_t LeafGreenTint = 25;
+constexpr std::uint8_t LeafBaseBlue = 45;
+constexpr std::uint8_t LeafBlueTint = 10;
 }
 
 ParticleSystem::ParticleSystem(const Shader& shader)
@@ -96,7 +104,8 @@ void ParticleSystem::CreateLeafTexture()
         {
             const float px = (static_cast<float>(x) + 0.5f) / static_cast<float>(textureSize) - 0.5f;
             const float py = (static_cast<float>(y) + 0.5f) / static_cast<float>(textureSize) - 0.5f;
-            const float leafMask = (px * px) / 0.06f + (py * py) / 0.2f;
+            const float leafMask = (px * px) / (LeafHalfWidth * LeafHalfWidth) +
+                                   (py * py) / (LeafHalfHeight * LeafHalfHeight);
             const bool inLeaf = leafMask <= 1.0f && std::abs(px) < 0.35f;
             const int index = (y * textureSize + x) * 4;
             if (!inLeaf) {
@@ -108,9 +117,9 @@ void ParticleSystem::CreateLeafTexture()
             }
 
             const float tint = Clamp01((py + 0.5f) * 1.2f);
-            data[index + 0] = static_cast<std::uint8_t>(190 + 40 * tint);
-            data[index + 1] = static_cast<std::uint8_t>(90 + 25 * tint);
-            data[index + 2] = static_cast<std::uint8_t>(45 + 10 * tint);
+            data[index + 0] = static_cast<std::uint8_t>(LeafBaseRed + LeafRedTint * tint);
+            data[index + 1] = static_cast<std::uint8_t>(LeafBaseGreen + LeafGreenTint * tint);
+            data[index + 2] = static_cast<std::uint8_t>(LeafBaseBlue + LeafBlueTint * tint);
             data[index + 3] = 255;
         }
     }
@@ -213,7 +222,7 @@ void ParticleSystem::EnsureVertexBufferCapacity(size_t requiredVertexCount)
     VertexCapacity = requiredVertexCount;
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER,
-                 static_cast<long>(VertexCapacity * sizeof(ParticleVertex)),
+                 static_cast<GLsizeiptr>(VertexCapacity * sizeof(ParticleVertex)),
                  nullptr, GL_DYNAMIC_DRAW);
 }
 
@@ -283,7 +292,7 @@ void ParticleSystem::Render(int width, int height)
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferSubData(GL_ARRAY_BUFFER, 0,
-                    static_cast<long>(Vertices.size() * sizeof(ParticleVertex)),
+                    static_cast<GLsizeiptr>(Vertices.size() * sizeof(ParticleVertex)),
                     Vertices.data());
 
     glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(width),
