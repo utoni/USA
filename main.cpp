@@ -91,7 +91,7 @@ int main() {
         std::vector<Layer> layers = {
             Layer{ { texMgr.Get("background"), texMgr.Get("background_structures") }, layerShader, 0.05f },
             Layer{ { texMgr.Get("midground"), texMgr.Get("midground_props") }, layerShader, 0.10f },
-            Layer{ { texMgr.Get("foreground_silhouettes"), texMgr.Get("foreground3") }, layerShader, 0.15f },
+            Layer{ { texMgr.Get("foreground3"), texMgr.Get("foreground_silhouettes") }, layerShader, 0.15f },
             Layer{ { texMgr.Get("foreground2") }, layerShader, 0.20f },
             Layer{ { texMgr.Get("foreground") }, layerShader, 0.35f },
         };
