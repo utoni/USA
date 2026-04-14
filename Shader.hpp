@@ -31,6 +31,11 @@ public:
         return glUniform2f(location, value0f, value1f);
     }
     void SetUniform(int location, GLfloat value0f, GLfloat value1f,
+                    GLfloat value2f) const
+    {
+        return glUniform3f(location, value0f, value1f, value2f);
+    }
+    void SetUniform(int location, GLfloat value0f, GLfloat value1f,
                     GLfloat value2f, GLfloat value3f) const
     {
         return glUniform4f(location, value0f, value1f, value2f, value3f);

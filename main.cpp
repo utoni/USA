@@ -67,6 +67,20 @@ int main() {
 
         Framebuffer fb(INTERNAL_WIDTH, INTERNAL_HEIGHT, fbShader);
         fb.Init();
+        fb.SetMoonSourcePosition(0.53f, 0.85f); // Sprite center in normalized screen-space.
+        fb.SetMoonDirection(-0.25f, -1.0f);     // Off-screen moonlight direction.
+        fb.ClearGodraysLightSources();
+        fb.AddGodraysLightSource(0.53f, 0.85f);  // Moon
+        fb.AddGodraysLightSource(0.865f, 0.625f);
+        fb.AddGodraysLightSource(0.615f, 0.775f);
+        fb.AddGodraysLightSource(0.415f, 0.525f);
+        fb.AddGodraysLightSource(0.315f, 0.625f);
+        fb.AddGodraysLightSource(0.115f, 0.825f);
+        fb.AddGodraysLightSource(0.815f, 0.725f);
+        fb.AddGodraysLightSource(0.715f, 0.625f);
+        fb.AddGodraysLightSource(0.365f, 0.525f);
+        fb.AddGodraysLightSource(0.265f, 0.675f);
+        fb.AddGodraysLightSource(0.165f, 0.775f);
 
         Quad quad;
         quad.Create();
@@ -80,6 +94,9 @@ int main() {
         };
 
         auto lastTime = glfwGetTime();
+        bool toggleGodraysWasDown = false;
+        bool toggleModeWasDown = false;
+        bool toggleDebugWasDown = false;
 
         while (!glfwWindowShouldClose(window)) {
             auto currentTime = glfwGetTime();
@@ -110,9 +127,24 @@ int main() {
                 layer.Update(static_cast<float>(delta));
             }
 
+            const bool toggleGodraysDown = glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS;
+            if (toggleGodraysDown && !toggleGodraysWasDown)
+                fb.ToggleGodrays();
+            toggleGodraysWasDown = toggleGodraysDown;
+
+            const bool toggleModeDown = glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS;
+            if (toggleModeDown && !toggleModeWasDown)
+                fb.ToggleGodraysSourceMode();
+            toggleModeWasDown = toggleModeDown;
+
+            const bool toggleDebugDown = glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS;
+            if (toggleDebugDown && !toggleDebugWasDown)
+                fb.ToggleGodraysMaskDebug();
+            toggleDebugWasDown = toggleDebugDown;
+
             int winW, winH;
             glfwGetFramebufferSize(window, &winW, &winH);
-            fb.RenderToScreen(quad, winW, winH);
+            fb.RenderToScreen(quad, winW, winH, static_cast<float>(currentTime));
 
             glfwSwapBuffers(window);
             glfwPollEvents();
