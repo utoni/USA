@@ -10,6 +10,7 @@
 
 #include "Framebuffer.hpp"
 #include "Layer.hpp"
+#include "ParticleSystem.hpp"
 #include "Quad.hpp"
 #include "ShaderManager.hpp"
 #include "SpriteBatch.hpp"
@@ -93,10 +94,42 @@ int main() {
             Layer{ { texMgr.Get("foreground") }, layerShader, 0.35f },
         };
 
+        ParticleSystem particles(shaderMgr.Get("particle"));
+        // Tree canopies are baked into the scrolling foreground layers, so we place
+        // a handful of canopy-space emitters across the top of those trees.
+        const auto makeLeafEmitter = [](float x, float y, unsigned int seed) {
+            ParticleSystem::EmitterConfig config;
+            config.SpawnRate = 10.0f;
+            config.BurstCount = 4;
+            config.BurstOnStart = true;
+            config.MaxParticles = 60;
+            config.LifetimeRange = {2.8f, 4.6f};
+            config.InitialVelocityXRange = {-0.018f, 0.018f};
+            config.InitialVelocityYRange = {-0.05f, -0.02f};
+            config.UseBoxSpawn = true;
+            config.SpawnPoint = {x, y};
+            config.SpawnBoxHalfSize = {0.05f, 0.03f};
+            config.Gravity = {0.0f, -0.08f};
+            config.Damping = 0.15f;
+            config.SizeRange = {0.014f, 0.022f};
+            config.AngularVelocityRange = {-0.9f, 0.9f};
+            config.Color = {1.0f, 1.0f, 1.0f, 0.92f};
+            config.FadeOutFraction = 0.35f;
+            config.WindStrength = 0.035f;
+            config.WindFrequency = 2.0f;
+            config.Seed = seed;
+            return config;
+        };
+        particles.AddEmitter(makeLeafEmitter(0.20f, 0.55f, 11));
+        particles.AddEmitter(makeLeafEmitter(0.46f, 0.58f, 13));
+        particles.AddEmitter(makeLeafEmitter(0.71f, 0.57f, 17));
+        particles.Init();
+
         auto lastTime = glfwGetTime();
         bool toggleGodraysWasDown = false;
         bool toggleModeWasDown = false;
         bool toggleDebugWasDown = false;
+        bool toggleLeavesWasDown = false;
 
         while (!glfwWindowShouldClose(window)) {
             auto currentTime = glfwGetTime();
@@ -122,10 +155,12 @@ int main() {
             for (auto i = 0lu; i < layers.size(); ++i) {
                 layers[i].Render(INTERNAL_WIDTH, INTERNAL_HEIGHT, quad);
             }
+            particles.Render(INTERNAL_WIDTH, INTERNAL_HEIGHT);
 
             for (auto& layer : layers) {
                 layer.Update(static_cast<float>(delta));
             }
+            particles.Update(static_cast<float>(delta));
 
             const bool toggleGodraysDown = glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS;
             if (toggleGodraysDown && !toggleGodraysWasDown)
@@ -141,6 +176,11 @@ int main() {
             if (toggleDebugDown && !toggleDebugWasDown)
                 fb.ToggleGodraysMaskDebug();
             toggleDebugWasDown = toggleDebugDown;
+
+            const bool toggleLeavesDown = glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS;
+            if (toggleLeavesDown && !toggleLeavesWasDown)
+                particles.SetEnabled(!particles.IsEnabled());
+            toggleLeavesWasDown = toggleLeavesDown;
 
             int winW, winH;
             glfwGetFramebufferSize(window, &winW, &winH);
