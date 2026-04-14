@@ -37,6 +37,11 @@ void Framebuffer::Init()
     Locations.GodraysSamples = FboShader.GetUniformLocation("godraysSamples");
     Locations.GodraysColor = FboShader.GetUniformLocation("godraysColor");
     Locations.GodraysNoiseAmount = FboShader.GetUniformLocation("godraysNoiseAmount");
+    Locations.FirefliesEnabled = FboShader.GetUniformLocation("enableFireflies");
+    Locations.FireflyIntensity = FboShader.GetUniformLocation("fireflyIntensity");
+    Locations.FireflyDensity = FboShader.GetUniformLocation("fireflyDensity");
+    Locations.FireflySize = FboShader.GetUniformLocation("fireflySize");
+    Locations.FireflySpeed = FboShader.GetUniformLocation("fireflySpeed");
     Locations.TimeSeconds = FboShader.GetUniformLocation("timeSeconds");
 
     glGenFramebuffers(1, &FboID);
@@ -162,6 +167,11 @@ void Framebuffer::RenderToScreen(Quad& quad, int width, int height, float timeSe
     FboShader.SetUniform(Locations.GodraysColor,
                          Godrays.Color.x, Godrays.Color.y, Godrays.Color.z);
     FboShader.SetUniform(Locations.GodraysNoiseAmount, Godrays.NoiseAmount);
+    FboShader.SetUniform(Locations.FirefliesEnabled, static_cast<int>(FirefliesEnabled));
+    FboShader.SetUniform(Locations.FireflyIntensity, Fireflies.Intensity);
+    FboShader.SetUniform(Locations.FireflyDensity, Fireflies.Density);
+    FboShader.SetUniform(Locations.FireflySize, Fireflies.Size);
+    FboShader.SetUniform(Locations.FireflySpeed, Fireflies.Speed);
     FboShader.SetUniform(Locations.TimeSeconds, timeSeconds);
 
     EndFrame();
@@ -183,6 +193,16 @@ void Framebuffer::ToggleGodraysSourceMode()
         SourceMode = GodraysSourceMode::Directional;
     else
         SourceMode = GodraysSourceMode::MoonSprite;
+}
+
+void Framebuffer::ToggleFireflies()
+{
+    FirefliesEnabled = !FirefliesEnabled;
+}
+
+void Framebuffer::AdjustFirefliesIntensity(float delta)
+{
+    Fireflies.Intensity = std::clamp(Fireflies.Intensity + delta, 0.0f, 1.5f);
 }
 
 void Framebuffer::SetMoonSourcePosition(float normalizedX, float normalizedY)

@@ -86,7 +86,10 @@ int main() {
         quad.Create();
 
         std::vector<Layer> layers = {
+            Layer{ { texMgr.Get("sky_stars") }, layerShader, 0.01f },
+            Layer{ { texMgr.Get("clouds_far") }, layerShader, 0.03f },
             Layer{ { texMgr.Get("background") }, layerShader, 0.05f },
+            Layer{ { texMgr.Get("fog_far") }, layerShader, 0.08f },
             Layer{ { texMgr.Get("midground") }, layerShader, 0.10f },
             Layer{ { texMgr.Get("foreground3") }, layerShader, 0.15f },
             Layer{ { texMgr.Get("foreground2") }, layerShader, 0.20f },
@@ -97,6 +100,9 @@ int main() {
         bool toggleGodraysWasDown = false;
         bool toggleModeWasDown = false;
         bool toggleDebugWasDown = false;
+        bool toggleFirefliesWasDown = false;
+        bool increaseFirefliesWasDown = false;
+        bool decreaseFirefliesWasDown = false;
 
         while (!glfwWindowShouldClose(window)) {
             auto currentTime = glfwGetTime();
@@ -141,6 +147,21 @@ int main() {
             if (toggleDebugDown && !toggleDebugWasDown)
                 fb.ToggleGodraysMaskDebug();
             toggleDebugWasDown = toggleDebugDown;
+
+            const bool toggleFirefliesDown = glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS;
+            if (toggleFirefliesDown && !toggleFirefliesWasDown)
+                fb.ToggleFireflies();
+            toggleFirefliesWasDown = toggleFirefliesDown;
+
+            const bool increaseFirefliesDown = glfwGetKey(window, GLFW_KEY_EQUAL) == GLFW_PRESS;
+            if (increaseFirefliesDown && !increaseFirefliesWasDown)
+                fb.AdjustFirefliesIntensity(0.05f);
+            increaseFirefliesWasDown = increaseFirefliesDown;
+
+            const bool decreaseFirefliesDown = glfwGetKey(window, GLFW_KEY_MINUS) == GLFW_PRESS;
+            if (decreaseFirefliesDown && !decreaseFirefliesWasDown)
+                fb.AdjustFirefliesIntensity(-0.05f);
+            decreaseFirefliesWasDown = decreaseFirefliesDown;
 
             int winW, winH;
             glfwGetFramebufferSize(window, &winW, &winH);

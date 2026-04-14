@@ -20,6 +20,11 @@ uniform float godraysWeight;
 uniform int godraysSamples;
 uniform vec3 godraysColor;
 uniform float godraysNoiseAmount;
+uniform int enableFireflies;
+uniform float fireflyIntensity;
+uniform float fireflyDensity;
+uniform float fireflySize;
+uniform float fireflySpeed;
 uniform float timeSeconds;
 
 const int MAX_GODRAY_SAMPLES = 96;
@@ -31,6 +36,14 @@ float hash(vec2 p)
     vec3 p3 = fract(vec3(p.xyx) * 0.1031);
     p3 += dot(p3, p3.yzx + 33.33);
     return fract((p3.x + p3.y) * p3.z);
+}
+
+vec2 hash2(vec2 p)
+{
+    return vec2(
+        hash(p + vec2(17.0, 31.0)),
+        hash(p + vec2(59.0, 83.0))
+    );
 }
 
 float luminance(vec3 color)
@@ -89,62 +102,97 @@ vec3 sampleRaysFromSource(vec2 sourceUV, int sampleCount)
     return rays;
 }
 
+vec3 sampleFireflies()
+{
+    if (enableFireflies == 0 || fireflyIntensity <= 0.0001)
+        return vec3(0.0);
+
+    vec2 gridScale = vec2(46.0, 26.0) * max(fireflyDensity, 0.25);
+    vec2 gridPos = TexCoord * gridScale;
+    vec2 baseCell = floor(gridPos);
+    vec3 particles = vec3(0.0);
+
+    for (int y = -1; y <= 1; ++y) {
+        for (int x = -1; x <= 1; ++x) {
+            vec2 cell = baseCell + vec2(float(x), float(y));
+            vec2 rnd = hash2(cell);
+
+            float phase = timeSeconds * fireflySpeed * (0.45 + rnd.x * 1.35);
+            vec2 drift = vec2(
+                sin(phase + rnd.y * 6.2831853),
+                cos(phase * 0.72 + rnd.x * 6.2831853)
+            ) * 0.22;
+
+            vec2 particleUV = (cell + rnd + drift) / gridScale;
+            vec2 toParticle = TexCoord - particleUV;
+            toParticle.x *= gridScale.x / gridScale.y;
+
+            float radius = fireflySize * (0.0045 + rnd.x * 0.0025);
+            float glow = smoothstep(radius, 0.0, length(toParticle));
+            float twinkle = 0.35 + 0.65 * (0.5 + 0.5 * sin(timeSeconds * (1.7 + rnd.y * 3.2) + rnd.x * 17.0));
+
+            particles += vec3(0.48, 0.62, 0.30) * glow * twinkle;
+        }
+    }
+
+    return particles * fireflyIntensity;
+}
+
 void main()
 {
     vec4 scene = texture(tex, TexCoord);
-    if (enableGodrays == 0) {
-        FragColor = scene;
-        return;
-    }
-
-    int sampleCount = clamp(godraysSamples, 1, MAX_GODRAY_SAMPLES);
     vec3 rays = vec3(0.0);
-    vec2 maskDebugSourceUV = vec2(0.0);
 
-    if (godraysSourceMode == 0) {
-        int sourceCount = clamp(godraysLightCount, 0, MAX_GODRAY_LIGHT_SOURCES);
-        if (sourceCount == 0) {
-            rays += sampleRaysFromSource(moonScreenPos, sampleCount);
-            maskDebugSourceUV = moonScreenPos;
-        } else {
-            int cappedSourceCount = min(sourceCount, MAX_GODRAY_SOURCES_PER_PIXEL);
-            if (cappedSourceCount > 0) {
-                int perSourceSampleCount = sampleCount / cappedSourceCount;
-                int remainingSamples = sampleCount % cappedSourceCount;
+    if (enableGodrays != 0) {
+        int sampleCount = clamp(godraysSamples, 1, MAX_GODRAY_SAMPLES);
+        vec2 maskDebugSourceUV = vec2(0.0);
 
-                for (int i = 0; i < MAX_GODRAY_LIGHT_SOURCES; ++i) {
-                    if (i >= cappedSourceCount)
-                        break;
-                    int sourceSamples = perSourceSampleCount;
-                    if (remainingSamples > 0) {
-                        sourceSamples += 1;
-                        remainingSamples -= 1;
+        if (godraysSourceMode == 0) {
+            int sourceCount = clamp(godraysLightCount, 0, MAX_GODRAY_LIGHT_SOURCES);
+            if (sourceCount == 0) {
+                rays += sampleRaysFromSource(moonScreenPos, sampleCount);
+                maskDebugSourceUV = moonScreenPos;
+            } else {
+                int cappedSourceCount = min(sourceCount, MAX_GODRAY_SOURCES_PER_PIXEL);
+                if (cappedSourceCount > 0) {
+                    int perSourceSampleCount = sampleCount / cappedSourceCount;
+                    int remainingSamples = sampleCount % cappedSourceCount;
+
+                    for (int i = 0; i < MAX_GODRAY_LIGHT_SOURCES; ++i) {
+                        if (i >= cappedSourceCount)
+                            break;
+                        int sourceSamples = perSourceSampleCount;
+                        if (remainingSamples > 0) {
+                            sourceSamples += 1;
+                            remainingSamples -= 1;
+                        }
+
+                        if (sourceSamples <= 0)
+                            continue;
+
+                        rays += sampleRaysFromSource(godraysLightPositions[i], sourceSamples);
                     }
-
-                    if (sourceSamples <= 0)
-                        continue;
-
-                    rays += sampleRaysFromSource(godraysLightPositions[i], sourceSamples);
                 }
+                maskDebugSourceUV = godraysLightPositions[0];
             }
-            maskDebugSourceUV = godraysLightPositions[0];
+        } else {
+            vec2 sourceUV = getLightSourceUV();
+            rays += sampleRaysFromSource(sourceUV, sampleCount);
+            maskDebugSourceUV = sourceUV;
         }
-    } else {
-        vec2 sourceUV = getLightSourceUV();
-        rays += sampleRaysFromSource(sourceUV, sampleCount);
-        maskDebugSourceUV = sourceUV;
+
+        float dither = (hash(gl_FragCoord.xy + vec2(timeSeconds * 17.0)) - 0.5) * godraysNoiseAmount;
+        rays *= godraysExposure * godraysIntensity;
+        // Keep dithering subtle to avoid overpowering sprite details.
+        rays += dither * godraysColor * 0.15;
+
+        if (showGodraysMask != 0) {
+            float mask = getOcclusionMask(TexCoord, maskDebugSourceUV);
+            FragColor = vec4(vec3(mask), 1.0);
+            return;
+        }
     }
 
-    float dither = (hash(gl_FragCoord.xy + vec2(timeSeconds * 17.0)) - 0.5) * godraysNoiseAmount;
-    rays *= godraysExposure * godraysIntensity;
-    // Keep dithering subtle to avoid overpowering sprite details.
-    rays += dither * godraysColor * 0.15;
-
-    if (showGodraysMask != 0) {
-        float mask = getOcclusionMask(TexCoord, maskDebugSourceUV);
-        FragColor = vec4(vec3(mask), 1.0);
-        return;
-    }
-
-    FragColor = vec4(scene.rgb + rays, scene.a);
+    vec3 fireflies = sampleFireflies();
+    FragColor = vec4(scene.rgb + rays + fireflies, scene.a);
 }

@@ -36,6 +36,8 @@ public:
     void ToggleGodrays();
     void ToggleGodraysMaskDebug();
     void ToggleGodraysSourceMode();
+    void ToggleFireflies();
+    void AdjustFirefliesIntensity(float delta);
     void SetMoonSourcePosition(float normalizedX, float normalizedY);
     void SetMoonDirection(float normalizedX, float normalizedY);
     void ClearGodraysLightSources();
@@ -71,6 +73,11 @@ private:
         int GodraysSamples = -1;
         int GodraysColor = -1;
         int GodraysNoiseAmount = -1;
+        int FirefliesEnabled = -1;
+        int FireflyIntensity = -1;
+        int FireflyDensity = -1;
+        int FireflySize = -1;
+        int FireflySpeed = -1;
         int TimeSeconds = -1;
     } Locations;
     struct GodraysParameters {
@@ -84,8 +91,15 @@ private:
         glm::vec3 Color = {0.62f, 0.72f, 0.95f};
         float NoiseAmount = 0.035f;
     } Godrays;
+    struct FireflyParameters {
+        float Intensity = 0.26f;
+        float Density = 1.0f;
+        float Size = 1.0f;
+        float Speed = 0.42f;
+    } Fireflies;
     bool GodraysEnabled = true;
     bool ShowGodraysMaskDebug = false;
+    bool FirefliesEnabled = true;
     GodraysSourceMode SourceMode = GodraysSourceMode::MoonSprite;
     glm::vec2 MoonSourcePosition = {0.53f, 0.85f};
     glm::vec2 MoonDirection = {-0.25f, -1.0f};
