@@ -53,6 +53,14 @@ size_t ParticleSystem::AddEmitter(const EmitterConfig& config)
     return Emitters.size() - 1;
 }
 
+void ParticleSystem::SetEmitterSpawnPoint(size_t emitterIndex, float x, float y)
+{
+    if (emitterIndex >= Emitters.size())
+        return;
+
+    Emitters[emitterIndex].Config.SpawnPoint = {x, y};
+}
+
 void ParticleSystem::Init()
 {
     Locations.MVP = ParticleShader.GetUniformLocation("mvp");

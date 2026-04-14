@@ -57,6 +57,7 @@ public:
     ~ParticleSystem();
 
     size_t AddEmitter(const EmitterConfig& config);
+    void SetEmitterSpawnPoint(size_t emitterIndex, float x, float y);
     void Init();
     void Update(float deltaTimeSeconds);
     void Render(int width, int height);

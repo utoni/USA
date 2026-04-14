@@ -53,3 +53,13 @@ void Layer::Render(int width, int height,
         quad.Draw();
     }
 }
+
+float Layer::GetScrollOffset() const
+{
+    const int texCount = static_cast<int>(TextureIDs.size());
+    if (texCount <= 0)
+        return 0.0f;
+
+    return static_cast<float>(fmod(static_cast<double>(Offset),
+                                   static_cast<double>(texCount)));
+}

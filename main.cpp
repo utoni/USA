@@ -5,6 +5,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <cmath>
 #include <iostream>
 #include <vector>
 
@@ -124,6 +125,17 @@ int main() {
         particles.AddEmitter(makeLeafEmitter(0.46f, 0.58f, 13));
         particles.AddEmitter(makeLeafEmitter(0.71f, 0.57f, 17));
         particles.Init();
+        struct LeafEmitterAnchor
+        {
+            size_t EmitterIndex;
+            size_t LayerIndex;
+            glm::vec2 BaseSpawnPoint;
+        };
+        std::vector<LeafEmitterAnchor> leafAnchors = {
+            {0, 3, {0.20f, 0.55f}},
+            {1, 4, {0.46f, 0.58f}},
+            {2, 4, {0.71f, 0.57f}},
+        };
 
         auto lastTime = glfwGetTime();
         bool toggleGodraysWasDown = false;
@@ -159,6 +171,14 @@ int main() {
 
             for (auto& layer : layers) {
                 layer.Update(static_cast<float>(delta));
+            }
+            for (const auto& anchor : leafAnchors) {
+                if (anchor.LayerIndex >= layers.size())
+                    continue;
+
+                float x = anchor.BaseSpawnPoint.x - layers[anchor.LayerIndex].GetScrollOffset();
+                x -= std::floor(x);
+                particles.SetEmitterSpawnPoint(anchor.EmitterIndex, x, anchor.BaseSpawnPoint.y);
             }
             particles.Update(static_cast<float>(delta));
 

@@ -15,6 +15,8 @@ public:
     void Update(float delta);
     void Render(int width, int height,
                 const Quad& quad) const;
+    [[nodiscard]]
+    float GetScrollOffset() const;
 
 private:
     const std::vector<unsigned int> TextureIDs;
