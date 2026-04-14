@@ -99,7 +99,7 @@ private:
     } Fireflies;
     bool GodraysEnabled = true;
     bool ShowGodraysMaskDebug = false;
-    bool FirefliesEnabled = true;
+    bool FirefliesActive = true;
     GodraysSourceMode SourceMode = GodraysSourceMode::MoonSprite;
     glm::vec2 MoonSourcePosition = {0.53f, 0.85f};
     glm::vec2 MoonDirection = {-0.25f, -1.0f};

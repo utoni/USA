@@ -30,6 +30,20 @@ uniform float timeSeconds;
 const int MAX_GODRAY_SAMPLES = 96;
 const int MAX_GODRAY_LIGHT_SOURCES = 16;
 const int MAX_GODRAY_SOURCES_PER_PIXEL = 4;
+const float FIREFLY_MIN_INTENSITY = 0.0001;
+const float FIREFLY_TWO_PI = 6.2831853;
+const vec2 FIREFLY_BASE_GRID_SCALE = vec2(46.0, 26.0);
+const float FIREFLY_SPEED_MIN = 0.45;
+const float FIREFLY_SPEED_RANGE = 1.35;
+const float FIREFLY_DRIFT_MAGNITUDE = 0.22;
+const float FIREFLY_RADIUS_BASE = 0.0045;
+const float FIREFLY_RADIUS_RANGE = 0.0025;
+const float FIREFLY_TWINKLE_MIN = 0.35;
+const float FIREFLY_TWINKLE_RANGE = 0.65;
+const float FIREFLY_TWINKLE_BASE_FREQ = 1.7;
+const float FIREFLY_TWINKLE_FREQ_RANGE = 3.2;
+const float FIREFLY_TWINKLE_PHASE_SCALE = 17.0;
+const vec3 FIREFLY_COLOR = vec3(0.48, 0.62, 0.30);
 
 float hash(vec2 p)
 {
@@ -104,10 +118,11 @@ vec3 sampleRaysFromSource(vec2 sourceUV, int sampleCount)
 
 vec3 sampleFireflies()
 {
-    if (enableFireflies == 0 || fireflyIntensity <= 0.0001)
+    if (enableFireflies == 0 || fireflyIntensity <= FIREFLY_MIN_INTENSITY)
         return vec3(0.0);
 
-    vec2 gridScale = vec2(46.0, 26.0) * max(fireflyDensity, 0.25);
+    // Base grid determines how many particles are distributed across the screen.
+    vec2 gridScale = FIREFLY_BASE_GRID_SCALE * max(fireflyDensity, 0.25);
     vec2 gridPos = TexCoord * gridScale;
     vec2 baseCell = floor(gridPos);
     vec3 particles = vec3(0.0);
@@ -117,21 +132,28 @@ vec3 sampleFireflies()
             vec2 cell = baseCell + vec2(float(x), float(y));
             vec2 rnd = hash2(cell);
 
-            float phase = timeSeconds * fireflySpeed * (0.45 + rnd.x * 1.35);
+            // Per-particle speed variation: [FIREFLY_SPEED_MIN, FIREFLY_SPEED_MIN + FIREFLY_SPEED_RANGE].
+            float phase = timeSeconds * fireflySpeed * (FIREFLY_SPEED_MIN + rnd.x * FIREFLY_SPEED_RANGE);
             vec2 drift = vec2(
-                sin(phase + rnd.y * 6.2831853),
-                cos(phase * 0.72 + rnd.x * 6.2831853)
-            ) * 0.22;
+                sin(phase + rnd.y * FIREFLY_TWO_PI),
+                cos(phase * 0.72 + rnd.x * FIREFLY_TWO_PI)
+            ) * FIREFLY_DRIFT_MAGNITUDE;
 
             vec2 particleUV = (cell + rnd + drift) / gridScale;
             vec2 toParticle = TexCoord - particleUV;
             toParticle.x *= gridScale.x / gridScale.y;
 
-            float radius = fireflySize * (0.0045 + rnd.x * 0.0025);
+            // Radius variation keeps particles from looking uniform.
+            float radius = fireflySize * (FIREFLY_RADIUS_BASE + rnd.x * FIREFLY_RADIUS_RANGE);
             float glow = smoothstep(radius, 0.0, length(toParticle));
-            float twinkle = 0.35 + 0.65 * (0.5 + 0.5 * sin(timeSeconds * (1.7 + rnd.y * 3.2) + rnd.x * 17.0));
+            // Twinkle brightness range is [0.35, 1.0], with per-particle phase/frequency variation.
+            float twinkle =
+                FIREFLY_TWINKLE_MIN +
+                FIREFLY_TWINKLE_RANGE * (0.5 + 0.5 *
+                sin(timeSeconds * (FIREFLY_TWINKLE_BASE_FREQ + rnd.y * FIREFLY_TWINKLE_FREQ_RANGE) +
+                    rnd.x * FIREFLY_TWINKLE_PHASE_SCALE));
 
-            particles += vec3(0.48, 0.62, 0.30) * glow * twinkle;
+            particles += FIREFLY_COLOR * glow * twinkle;
         }
     }
 

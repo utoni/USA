@@ -86,9 +86,11 @@ int main() {
         quad.Create();
 
         std::vector<Layer> layers = {
-            Layer{ { texMgr.Get("sky_stars") }, layerShader, 0.01f },
+            // Slowest sky parallax layers stay closest to the horizon.
+            Layer{ { texMgr.Get("stars_far") }, layerShader, 0.01f },
             Layer{ { texMgr.Get("clouds_far") }, layerShader, 0.03f },
             Layer{ { texMgr.Get("background") }, layerShader, 0.05f },
+            // Slightly faster atmospheric fog bridges background/midground depth.
             Layer{ { texMgr.Get("fog_far") }, layerShader, 0.08f },
             Layer{ { texMgr.Get("midground") }, layerShader, 0.10f },
             Layer{ { texMgr.Get("foreground3") }, layerShader, 0.15f },

@@ -17,7 +17,7 @@ The fullscreen framebuffer pass now includes a pixel-art friendly moon godrays e
   - `Directional off-screen source` (uses a normalized moonlight direction)
 - `B` toggles debug mask visualization (shows the sampled occlusion mask).
 - `F` toggles firefly particles on/off.
-- `-` / `=` lowers/raises firefly intensity.
+- `-` / `=` lowers/raises firefly intensity in `0.05` steps (range `0.0` to `1.5`).
 
 In moon sprite mode, multiple emitters can be configured (moon + stars) via
 `Framebuffer::AddGodraysLightSource(...)`.
@@ -40,7 +40,7 @@ Godrays parameters live in `Framebuffer.hpp` inside `GodraysParameters`:
 
 The parallax stack now includes extra dark/night pixel layers:
 
-- `sky_stars.png` (distant stars + silhouette band)
+- `stars_far.png` (distant stars + silhouette band)
 - `clouds_far.png` (dim high-altitude cloud layer)
 - `fog_far.png` (slow drifting low fog layer)
 

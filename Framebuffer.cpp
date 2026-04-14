@@ -167,7 +167,7 @@ void Framebuffer::RenderToScreen(Quad& quad, int width, int height, float timeSe
     FboShader.SetUniform(Locations.GodraysColor,
                          Godrays.Color.x, Godrays.Color.y, Godrays.Color.z);
     FboShader.SetUniform(Locations.GodraysNoiseAmount, Godrays.NoiseAmount);
-    FboShader.SetUniform(Locations.FirefliesEnabled, static_cast<int>(FirefliesEnabled));
+    FboShader.SetUniform(Locations.FirefliesEnabled, static_cast<int>(FirefliesActive));
     FboShader.SetUniform(Locations.FireflyIntensity, Fireflies.Intensity);
     FboShader.SetUniform(Locations.FireflyDensity, Fireflies.Density);
     FboShader.SetUniform(Locations.FireflySize, Fireflies.Size);
@@ -197,12 +197,16 @@ void Framebuffer::ToggleGodraysSourceMode()
 
 void Framebuffer::ToggleFireflies()
 {
-    FirefliesEnabled = !FirefliesEnabled;
+    FirefliesActive = !FirefliesActive;
 }
 
 void Framebuffer::AdjustFirefliesIntensity(float delta)
 {
-    Fireflies.Intensity = std::clamp(Fireflies.Intensity + delta, 0.0f, 1.5f);
+    constexpr float kFireflyIntensityMin = 0.0f;
+    constexpr float kFireflyIntensityMax = 1.5f;
+    // Allows subtle effects (<1.0) while still permitting stronger visibility when desired.
+    Fireflies.Intensity = std::clamp(Fireflies.Intensity + delta,
+                                     kFireflyIntensityMin, kFireflyIntensityMax);
 }
 
 void Framebuffer::SetMoonSourcePosition(float normalizedX, float normalizedY)
