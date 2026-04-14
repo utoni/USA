@@ -52,11 +52,14 @@ int main() {
         ShaderManager shaderMgr;
         shaderMgr.LoadShaders("./shaders");
 
-        TextureAtlas sprites(192, 64);
+        TextureAtlas sprites(384, 64);
         sprites.SetTexture(texMgr, "sprites");
         sprites.Add("moon", 0, 0, 64, 64);
         sprites.Add("star_00", 64, 0, 64, 64);
         sprites.Add("star_01", 128, 0, 64, 64);
+        sprites.Add("crow", 192, 0, 64, 64);
+        sprites.Add("dead_tree", 256, 0, 64, 64);
+        sprites.Add("lantern", 320, 0, 64, 64);
 
         const auto& spriteShader = shaderMgr.Get("sprite_batch");
         const auto& layerShader = shaderMgr.Get("layer");
@@ -86,9 +89,9 @@ int main() {
         quad.Create();
 
         std::vector<Layer> layers = {
-            Layer{ { texMgr.Get("background") }, layerShader, 0.05f },
-            Layer{ { texMgr.Get("midground") }, layerShader, 0.10f },
-            Layer{ { texMgr.Get("foreground3") }, layerShader, 0.15f },
+            Layer{ { texMgr.Get("background"), texMgr.Get("background_structures") }, layerShader, 0.05f },
+            Layer{ { texMgr.Get("midground"), texMgr.Get("midground_props") }, layerShader, 0.10f },
+            Layer{ { texMgr.Get("foreground_silhouettes"), texMgr.Get("foreground3") }, layerShader, 0.15f },
             Layer{ { texMgr.Get("foreground2") }, layerShader, 0.20f },
             Layer{ { texMgr.Get("foreground") }, layerShader, 0.35f },
         };
@@ -117,6 +120,9 @@ int main() {
             batch.Draw("star_01", 0.35f, 0.50f, 0.03f, 0.05f);
             batch.Draw("star_01", 0.25f, 0.65f, 0.03f, 0.05f);
             batch.Draw("star_01", 0.15f, 0.75f, 0.03f, 0.05f);
+            batch.Draw("crow", 0.72f, 0.82f, 0.035f, 0.05f);
+            batch.Draw("dead_tree", 0.23f, 0.26f, 0.06f, 0.12f);
+            batch.Draw("lantern", 0.31f, 0.22f, 0.028f, 0.06f);
             batch.Flush(INTERNAL_WIDTH, INTERNAL_HEIGHT);
 
             for (auto i = 0lu; i < layers.size(); ++i) {
