@@ -4,7 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <math.h>
+#include <cmath>
 
 Layer::Layer(const std::vector<unsigned int>& textureIDs,
              const Shader& shader,
@@ -60,6 +60,5 @@ float Layer::GetScrollOffset() const
     if (texCount <= 0)
         return 0.0f;
 
-    return static_cast<float>(fmod(static_cast<double>(Offset),
-                                   static_cast<double>(texCount)));
+    return std::fmod(Offset, static_cast<float>(texCount));
 }

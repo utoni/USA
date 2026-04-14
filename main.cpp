@@ -24,6 +24,21 @@ const unsigned int HEIGHT = 1080;
 const unsigned int INTERNAL_WIDTH = 480;
 const unsigned int INTERNAL_HEIGHT = 270;
 
+struct LeafEmitterAnchor
+{
+    size_t EmitterIndex;
+    size_t LayerIndex;
+    glm::vec2 BaseSpawnPoint;
+};
+
+float Wrap01(float value)
+{
+    value = std::fmod(value, 1.0f);
+    if (value < 0.0f)
+        value += 1.0f;
+    return value;
+}
+
 void GLAPIENTRY GLDebugMessage(
     GLenum source, GLenum type, GLuint id,
     GLenum severity, GLsizei length,
@@ -125,12 +140,6 @@ int main() {
         particles.AddEmitter(makeLeafEmitter(0.46f, 0.58f, 13));
         particles.AddEmitter(makeLeafEmitter(0.71f, 0.57f, 17));
         particles.Init();
-        struct LeafEmitterAnchor
-        {
-            size_t EmitterIndex;
-            size_t LayerIndex;
-            glm::vec2 BaseSpawnPoint;
-        };
         std::vector<LeafEmitterAnchor> leafAnchors = {
             {0, 3, {0.20f, 0.55f}},
             {1, 4, {0.46f, 0.58f}},
@@ -176,8 +185,7 @@ int main() {
                 if (anchor.LayerIndex >= layers.size())
                     continue;
 
-                float x = anchor.BaseSpawnPoint.x - layers[anchor.LayerIndex].GetScrollOffset();
-                x -= std::floor(x);
+                float x = Wrap01(anchor.BaseSpawnPoint.x - layers[anchor.LayerIndex].GetScrollOffset());
                 particles.SetEmitterSpawnPoint(anchor.EmitterIndex, x, anchor.BaseSpawnPoint.y);
             }
             particles.Update(static_cast<float>(delta));
