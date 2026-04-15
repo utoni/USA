@@ -35,7 +35,7 @@ float hash(vec2 p)
 
 float luminance(vec3 color)
 {
-    return dot(color, vec3(0.2126, 0.7152, 0.0722));
+    return dot(color, vec3(0.35, 0.55, 0.25));
 }
 
 vec2 getLightSourceUV()

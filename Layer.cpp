@@ -12,8 +12,6 @@ Layer::Layer(const std::vector<unsigned int>& textureIDs,
     : TextureIDs(textureIDs), LayerShader(shader),
       ScrollSpeed(scrollSpeed)
 {
-    Locations.UvOffset = LayerShader.GetUniformLocation("uvOffset");
-    Locations.UvScale = LayerShader.GetUniformLocation("uvScale");
     Locations.MVP = LayerShader.GetUniformLocation("mvp");
 }
 
@@ -44,8 +42,6 @@ void Layer::Render(int width, int height,
         glm::mat4 mvp = projection * model;
 
         LayerShader.Use();
-        LayerShader.SetUniform(Locations.UvOffset, 0.0f, 0.0f);
-        LayerShader.SetUniform(Locations.UvScale, 1.0f, 1.0f);
         LayerShader.SetUniform(Locations.MVP, glm::value_ptr(mvp));
 
         glActiveTexture(GL_TEXTURE0);

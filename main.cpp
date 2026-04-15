@@ -97,6 +97,8 @@ int main() {
         bool toggleGodraysWasDown = false;
         bool toggleModeWasDown = false;
         bool toggleDebugWasDown = false;
+        bool toggleDecreaseScrollWasDown = false;
+        bool toggleIncreaseScrollWasDown = false;
 
         while (!glfwWindowShouldClose(window)) {
             auto currentTime = glfwGetTime();
@@ -119,13 +121,20 @@ int main() {
             batch.Draw("star_01", 0.15f, 0.75f, 0.03f, 0.05f);
             batch.Flush(INTERNAL_WIDTH, INTERNAL_HEIGHT);
 
-            for (auto i = 0lu; i < layers.size(); ++i) {
-                layers[i].Render(INTERNAL_WIDTH, INTERNAL_HEIGHT, quad);
+            for (const auto& layer : layers) {
+                layer.Render(INTERNAL_WIDTH, INTERNAL_HEIGHT, quad);
             }
 
             for (auto& layer : layers) {
                 layer.Update(static_cast<float>(delta));
             }
+
+            int winW, winH;
+            glfwGetFramebufferSize(window, &winW, &winH);
+            fb.RenderToScreen(quad, winW, winH, static_cast<float>(currentTime));
+
+            glfwSwapBuffers(window);
+            glfwPollEvents();
 
             const bool toggleGodraysDown = glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS;
             if (toggleGodraysDown && !toggleGodraysWasDown)
@@ -142,12 +151,18 @@ int main() {
                 fb.ToggleGodraysMaskDebug();
             toggleDebugWasDown = toggleDebugDown;
 
-            int winW, winH;
-            glfwGetFramebufferSize(window, &winW, &winH);
-            fb.RenderToScreen(quad, winW, winH, static_cast<float>(currentTime));
+            const bool toggleDecreaseScrollDown = glfwGetKey(window, GLFW_KEY_LEFT);
+            if (toggleDecreaseScrollDown && !toggleDecreaseScrollWasDown)
+                for (auto& layer : layers)
+                    layer.SetScrollSpeed(layer.GetScrollSpeed() * 0.95f);
+            toggleDecreaseScrollWasDown = toggleDecreaseScrollDown;
 
-            glfwSwapBuffers(window);
-            glfwPollEvents();
+            const bool toggleIncreaseScrollDown = glfwGetKey(window, GLFW_KEY_RIGHT);
+            if (toggleIncreaseScrollDown && !toggleIncreaseScrollWasDown)
+                for (auto& layer : layers)
+                    layer.SetScrollSpeed(layer.GetScrollSpeed() * 1.05f);
+            toggleIncreaseScrollWasDown = toggleIncreaseScrollDown;
+
             if (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_RELEASE)
                 break;
         }
