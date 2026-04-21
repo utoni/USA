@@ -5,11 +5,14 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <cmath>
 #include <iostream>
 #include <vector>
 
 #include "Framebuffer.hpp"
 #include "Layer.hpp"
+#include "ParticleEmitter.hpp"
+#include "ParticleSystem.hpp"
 #include "Quad.hpp"
 #include "ShaderManager.hpp"
 #include "SpriteBatch.hpp"
@@ -93,7 +96,21 @@ int main() {
             Layer{ { texMgr.Get("foreground") }, layerShader, 0.35f },
         };
 
+        ParticleSystem particles(shaderMgr.Get("particle"));
+        ParticleEmitter emitters(particles);
+        unsigned int emitter_count = 0;
+        {
+            auto [emitter_cfg, emitter_anchor] = ParticleEmitter::MakeLeafEmitter(0.20f, 0.70f, emitter_count++, 4, 3, 11);
+            emitters.AddEmitter(emitter_cfg, emitter_anchor);
+        }
+        {
+            auto [emitter_cfg, emitter_anchor] = ParticleEmitter::MakeLeafEmitter(0.75f, 0.70f, emitter_count++, 4, 3, 13);
+            emitters.AddEmitter(emitter_cfg, emitter_anchor);
+        }
+        particles.Init();
+
         auto lastTime = glfwGetTime();
+        bool toggleParticlesWasDown = false;
         bool toggleGodraysWasDown = false;
         bool toggleModeWasDown = false;
         bool toggleDebugWasDown = false;
@@ -121,13 +138,17 @@ int main() {
             batch.Draw("star_01", 0.15f, 0.75f, 0.03f, 0.05f);
             batch.Flush(INTERNAL_WIDTH, INTERNAL_HEIGHT);
 
-            for (const auto& layer : layers) {
-                layer.Render(INTERNAL_WIDTH, INTERNAL_HEIGHT, quad);
+            for (decltype(layers)::size_type i = 0; i < layers.size(); ++i) {
+                layers[i].Render(INTERNAL_WIDTH, INTERNAL_HEIGHT, quad);
+                emitters.RenderAfterLayer(INTERNAL_WIDTH, INTERNAL_HEIGHT, i);
             }
 
-            for (auto& layer : layers) {
-                layer.Update(static_cast<float>(delta));
+            for (size_t i = 0; i < layers.size(); ++i) {
+                layers[i].Update(static_cast<float>(delta));
             }
+
+            emitters.Update(layers);
+            particles.Update(static_cast<float>(delta));
 
             int winW, winH;
             glfwGetFramebufferSize(window, &winW, &winH);
@@ -135,6 +156,11 @@ int main() {
 
             glfwSwapBuffers(window);
             glfwPollEvents();
+
+            const bool toggleParticlesDown = glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS;
+            if (toggleParticlesDown && !toggleParticlesWasDown)
+                particles.ToggleEnabled();
+            toggleParticlesWasDown = toggleParticlesDown;
 
             const bool toggleGodraysDown = glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS;
             if (toggleGodraysDown && !toggleGodraysWasDown)

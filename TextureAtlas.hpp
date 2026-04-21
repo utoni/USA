@@ -21,7 +21,6 @@ public:
     explicit TextureAtlas(int texWidth, int texHeight)
         : TextureAtlasWidth(texWidth), TextureAtlasHeight(texHeight)
     {}
-    ~TextureAtlas() {}
 
     void SetTexture(const TextureManager& texMgr,
                     const std::string& name);

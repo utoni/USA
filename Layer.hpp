@@ -15,8 +15,13 @@ public:
     void Update(float delta);
     void Render(int width, int height,
                 const Quad& quad) const;
+    [[nodiscard]]
     float GetScrollSpeed() const { return ScrollSpeed; }
     void SetScrollSpeed(float newSpeed) { ScrollSpeed = newSpeed; }
+    [[nodiscard]]
+    float GetScrollOffset() const;
+    [[nodiscard]]
+    float GetPreviousScrollOffset() const;
 
 private:
     const std::vector<unsigned int> TextureIDs;
@@ -26,4 +31,5 @@ private:
     } Locations;
     float ScrollSpeed;
     float Offset = 0.0f;
+    float PreviousOffset = 0.0f;
 };

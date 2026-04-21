@@ -4,7 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <math.h>
+#include <cmath>
 
 Layer::Layer(const std::vector<unsigned int>& textureIDs,
              const Shader& shader,
@@ -17,6 +17,7 @@ Layer::Layer(const std::vector<unsigned int>& textureIDs,
 
 void Layer::Update(float delta)
 {
+    PreviousOffset = Offset;
     Offset += ScrollSpeed * delta;
 }
 
@@ -48,4 +49,22 @@ void Layer::Render(int width, int height,
         glBindTexture(GL_TEXTURE_2D, TextureIDs[idx]);
         quad.Draw();
     }
+}
+
+float Layer::GetScrollOffset() const
+{
+    const int texCount = static_cast<int>(TextureIDs.size());
+    if (texCount <= 0)
+        return 0.0f;
+
+    return std::fmod(Offset, static_cast<float>(texCount));
+}
+
+float Layer::GetPreviousScrollOffset() const
+{
+    const int texCount = static_cast<int>(TextureIDs.size());
+    if (texCount <= 0)
+        return 0.0f;
+
+    return std::fmod(PreviousOffset, static_cast<float>(texCount));
 }

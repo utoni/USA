@@ -1,6 +1,6 @@
 all: usa
 
-CC = g++
+CC = g++ -I.
 
 usa-dbg:
 	$(CC) -Wall -O0 -g3 -fstrict-aliasing -fsanitize=address -fsanitize=leak -fsanitize=undefined -DSTB_IMAGE_IMPLEMENTATION=1 *.c *.cpp -o usa-dbg -lglfw
