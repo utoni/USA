@@ -100,11 +100,11 @@ int main() {
         ParticleEmitter emitters(particles);
         unsigned int emitter_count = 0;
         {
-            auto [emitter_cfg, emitter_anchor] = ParticleEmitter::MakeLeafEmitter(0.20f, 0.70f, emitter_count++, 4, 3, 11);
+            auto [emitter_cfg, emitter_anchor] = ParticleEmitter::MakeLeafEmitter(0.20f, 0.70f, emitter_count++, 4, 4, 11);
             emitters.AddEmitter(emitter_cfg, emitter_anchor);
         }
         {
-            auto [emitter_cfg, emitter_anchor] = ParticleEmitter::MakeLeafEmitter(0.75f, 0.70f, emitter_count++, 4, 3, 13);
+            auto [emitter_cfg, emitter_anchor] = ParticleEmitter::MakeLeafEmitter(0.75f, 0.70f, emitter_count++, 4, 4, 13);
             emitters.AddEmitter(emitter_cfg, emitter_anchor);
         }
         particles.Init();

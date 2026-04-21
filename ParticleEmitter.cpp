@@ -4,7 +4,7 @@ void ParticleEmitter::RenderAfterLayer(int width, int height, unsigned int layer
 {
     for (auto& anchor : Anchors) {
         if (anchor.RenderAfterLayer == layerIndex)
-            Particles.RenderEmitter(anchor.EmitterIndex, width, width);
+            Particles.RenderEmitter(anchor.EmitterIndex, width, height);
     }
 }
 
@@ -28,6 +28,29 @@ void ParticleEmitter::Update(const std::vector<Layer>& layers)
         Particles.ShiftEmitterParticles(anchor.EmitterIndex, -scrollDelta, 0.0f);
         float x = Wrap01(anchor.BaseSpawnPoint.x - currOffset);
         Particles.SetEmitterSpawnPoint(anchor.EmitterIndex, x, anchor.BaseSpawnPoint.y);
+
+        // Detect when the spawn point wraps around (tree re-enters from the right).
+        // prevSpawnX was near 0 and x jumped to near 1 → the emitter crossed its
+        // wrap boundary, meaning the tree finished one scroll pass.
+        float prevSpawnX = Wrap01(anchor.BaseSpawnPoint.x - prevOffset);
+        bool wrapped = (x - prevSpawnX > 0.5f);
+
+        if (anchor.ActiveTexIndex >= 0) {
+            // Multi-texture layer: only emit while the correct tile is active.
+            int currTexIndex = static_cast<int>(currOffset);
+            bool isActive = (currTexIndex == anchor.ActiveTexIndex);
+            Particles.SetSpawnEnabled(anchor.EmitterIndex, isActive);
+            // Reset burst while in the inactive tile so it fires immediately
+            // when the active tile becomes visible again.
+            if (wrapped && !isActive)
+                Particles.ResetBurst(anchor.EmitterIndex);
+        } else {
+            // Single-texture (always active): re-burst every time the tree
+            // re-enters from the right edge so the particle cloud is full
+            // from the moment the tree appears, not just after ~1.4 seconds.
+            if (wrapped)
+                Particles.ResetBurst(anchor.EmitterIndex);
+        }
     }
 }
 
@@ -45,7 +68,7 @@ ParticleEmitter::MakeLeafEmitter(
 
     ParticleSystem::EmitterConfig config;
     config.SpawnRate = 10.0f;
-    config.BurstCount = 4;
+    config.BurstCount = 20;
     config.BurstOnStart = true;
     config.MaxParticles = 60;
     config.LifetimeRange = {4.8f, 4.6f};

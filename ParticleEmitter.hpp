@@ -15,6 +15,9 @@ public:
         unsigned int LayerIndex = -1;
         unsigned int RenderAfterLayer = -1;
         glm::vec2 BaseSpawnPoint;
+        // Restrict emission to a specific texture tile index (0-based).
+        // Set to -1 (default) to always emit regardless of which tile is active.
+        int ActiveTexIndex = -1;
     };
 
 public:

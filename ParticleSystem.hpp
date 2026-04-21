@@ -67,6 +67,8 @@ public:
     [[nodiscard]]
     bool IsEnabled() const { return Enabled; }
     void ToggleEnabled() { SetEnabled(!IsEnabled()); }
+    void ResetBurst(size_t emitterIndex);
+    void SetSpawnEnabled(size_t emitterIndex, bool enabled);
 
 private:
     struct ParticleVertex
@@ -89,6 +91,7 @@ private:
         float SpawnAccumulator = 0.0f;
         int Cursor = 0;
         bool BurstDone = false;
+        bool SpawnEnabled = true;
     };
 
     static float RandomRange(std::mt19937& random, float min, float max);

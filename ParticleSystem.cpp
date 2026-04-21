@@ -72,6 +72,20 @@ void ParticleSystem::ShiftEmitterParticles(size_t emitterIndex, float dx, float 
     }
 }
 
+void ParticleSystem::ResetBurst(size_t emitterIndex)
+{
+    if (emitterIndex >= Emitters.size())
+        return;
+    Emitters[emitterIndex].BurstDone = false;
+}
+
+void ParticleSystem::SetSpawnEnabled(size_t emitterIndex, bool enabled)
+{
+    if (emitterIndex >= Emitters.size())
+        return;
+    Emitters[emitterIndex].SpawnEnabled = enabled;
+}
+
 void ParticleSystem::Init()
 {
     Locations.MVP = ParticleShader.GetUniformLocation("mvp");
@@ -197,20 +211,22 @@ void ParticleSystem::Update(float deltaTimeSeconds)
     for (auto& emitter : Emitters)
     {
         const auto& cfg = emitter.Config;
-        if (cfg.BurstOnStart && !emitter.BurstDone)
+        if (cfg.BurstOnStart && !emitter.BurstDone && emitter.SpawnEnabled)
         {
             for (int burst = 0; burst < cfg.BurstCount; ++burst)
                 SpawnParticle(emitter);
             emitter.BurstDone = true;
         }
 
-        emitter.SpawnAccumulator += cfg.SpawnRate * deltaTimeSeconds;
-        auto spawnCount = static_cast<int>(std::floor(emitter.SpawnAccumulator));
-        if (spawnCount > 0)
-            emitter.SpawnAccumulator -= static_cast<float>(spawnCount);
+        if (emitter.SpawnEnabled) {
+            emitter.SpawnAccumulator += cfg.SpawnRate * deltaTimeSeconds;
+            auto spawnCount = static_cast<int>(std::floor(emitter.SpawnAccumulator));
+            if (spawnCount > 0)
+                emitter.SpawnAccumulator -= static_cast<float>(spawnCount);
 
-        for (int i = 0; i < spawnCount; ++i)
-            SpawnParticle(emitter);
+            for (int i = 0; i < spawnCount; ++i)
+                SpawnParticle(emitter);
+        }
 
         for (auto& particle : emitter.Particles)
         {
