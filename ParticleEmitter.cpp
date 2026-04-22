@@ -4,7 +4,7 @@ void ParticleEmitter::RenderAfterLayer(int width, int height, unsigned int layer
 {
     for (auto& anchor : Anchors) {
         if (anchor.RenderAfterLayer == layerIndex)
-            Particles.RenderEmitter(anchor.EmitterIndex, width, width);
+            Particles.RenderEmitter(anchor.EmitterIndex, width, height);
     }
 }
 
@@ -45,7 +45,7 @@ ParticleEmitter::MakeLeafEmitter(
 
     ParticleSystem::EmitterConfig config;
     config.SpawnRate = 10.0f;
-    config.BurstCount = 4;
+    config.BurstCount = 20;
     config.BurstOnStart = true;
     config.MaxParticles = 60;
     config.LifetimeRange = {4.8f, 4.6f};

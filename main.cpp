@@ -5,6 +5,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
+#include <algorithm>
 #include <cmath>
 #include <iostream>
 #include <vector>
@@ -90,21 +92,26 @@ int main() {
 
         std::vector<Layer> layers = {
             Layer{ { texMgr.Get("background") }, layerShader, 0.05f },
+            Layer{ { texMgr.Get("next-midground") }, layerShader, 0.08f },
             Layer{ { texMgr.Get("midground") }, layerShader, 0.10f },
-            Layer{ { texMgr.Get("foreground3") }, layerShader, 0.15f },
-            Layer{ { texMgr.Get("foreground2") }, layerShader, 0.20f },
-            Layer{ { texMgr.Get("foreground") }, layerShader, 0.35f },
+            Layer{ { texMgr.Get("next-next-foreground") }, layerShader, 0.15f },
+            Layer{ { texMgr.Get("next-foreground") }, layerShader, 0.20f },
+            Layer{ { texMgr.Get("foreground"), texMgr.Get("foreground2") }, layerShader, 0.35f },
         };
 
         ParticleSystem particles(shaderMgr.Get("particle"));
         ParticleEmitter emitters(particles);
         unsigned int emitter_count = 0;
         {
-            auto [emitter_cfg, emitter_anchor] = ParticleEmitter::MakeLeafEmitter(0.20f, 0.70f, emitter_count++, 4, 3, 11);
+            const auto layerIndex = Layer::GetLayerIndexByTextureID(texMgr.Get("foreground"), layers);
+            auto [emitter_cfg, emitter_anchor] = ParticleEmitter::MakeLeafEmitter(0.20f, 0.70f, emitter_count++,
+                layerIndex, std::min(layers.size() - 1, static_cast<size_t>(layerIndex) - 1), 11);
             emitters.AddEmitter(emitter_cfg, emitter_anchor);
         }
         {
-            auto [emitter_cfg, emitter_anchor] = ParticleEmitter::MakeLeafEmitter(0.75f, 0.70f, emitter_count++, 4, 3, 13);
+            const auto layerIndex = Layer::GetLayerIndexByTextureID(texMgr.Get("foreground"), layers);
+            auto [emitter_cfg, emitter_anchor] = ParticleEmitter::MakeLeafEmitter(0.75f, 0.70f, emitter_count++,
+                layerIndex, std::min(layers.size() - 1, static_cast<size_t>(layerIndex - 1)), 13);
             emitters.AddEmitter(emitter_cfg, emitter_anchor);
         }
         particles.Init();

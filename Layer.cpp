@@ -1,6 +1,7 @@
 #include "Layer.hpp"
 #include "Transform.hpp"
 
+#include <algorithm>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -67,4 +68,23 @@ float Layer::GetPreviousScrollOffset() const
         return 0.0f;
 
     return std::fmod(PreviousOffset, static_cast<float>(texCount));
+}
+
+bool Layer::HasTextureID(unsigned int textureID) const
+{
+    const auto iter = std::find_if(TextureIDs.begin(), TextureIDs.end(), [textureID](unsigned int other) {
+        return textureID == other;
+    });
+
+    return iter != TextureIDs.cend();
+}
+
+unsigned int Layer::GetLayerIndexByTextureID(unsigned int textureID, const std::vector<Layer>& layers)
+{
+    for (size_t i = 0; i < layers.size(); ++i) {
+        if (layers[i].HasTextureID(textureID))
+            return i;
+    }
+
+    throw std::runtime_error("Layer Index not found with given Texture Name");
 }
