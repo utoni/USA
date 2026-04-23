@@ -3,7 +3,7 @@
 void ParticleEmitter::RenderAfterLayer(int width, int height, unsigned int layerIndex)
 {
     for (auto& anchor : Anchors) {
-        if (anchor.RenderAfterLayer == layerIndex)
+        if (anchor.RenderAfterLayer == layerIndex && anchor.RenderEnabled)
             Particles.RenderEmitter(anchor.EmitterIndex, width, height);
     }
 }
@@ -16,7 +16,7 @@ void ParticleEmitter::AddEmitter(const ParticleSystem::EmitterConfig& cfg, const
 
 void ParticleEmitter::Update(const std::vector<Layer>& layers)
 {
-    for (const auto& anchor : Anchors) {
+    for (auto& anchor : Anchors) {
         if (anchor.LayerIndex >= layers.size()) continue;
 
         float currOffset = layers[anchor.LayerIndex].GetScrollOffset();
@@ -32,6 +32,7 @@ void ParticleEmitter::Update(const std::vector<Layer>& layers)
         if (anchor.SpawnTextureID != 0) {
             const bool visible = layers[anchor.LayerIndex].GetCurrentTextureID() == anchor.SpawnTextureID;
             Particles.SetEmitterSpawnEnabled(anchor.EmitterIndex, visible);
+            anchor.RenderEnabled = visible;
         }
     }
 }
