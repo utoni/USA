@@ -71,9 +71,9 @@ float Layer::GetPreviousScrollOffset() const
 
 int Layer::GetTextureIndex(unsigned int textureID) const
 {
-    for (int i = 0; i < static_cast<int>(TextureIDs.size()); ++i) {
-        if (TextureIDs[static_cast<size_t>(i)] == textureID)
-            return i;
+    for (size_t i = 0; i < TextureIDs.size(); ++i) {
+        if (TextureIDs[i] == textureID)
+            return static_cast<int>(i);
     }
     return -1;
 }
