@@ -33,9 +33,13 @@ void ParticleEmitter::Update(const std::vector<Layer>& layers)
 
         if (anchor.SpawnTextureID != 0) {
             const float localOffset = currOffset - std::floor(currOffset);
-            const bool visible = layers[anchor.LayerIndex].GetCurrentTextureID() == anchor.SpawnTextureID
-                                 && localOffset <= anchor.BaseSpawnPoint.x;
-            Particles.SetEmitterSpawnEnabled(anchor.EmitterIndex, visible);
+            // Primary texture (i=0) scrolls off the left: visible when localOffset <= spawnX
+            const bool primaryVisible = layers[anchor.LayerIndex].GetCurrentTextureID() == anchor.SpawnTextureID
+                                        && localOffset <= anchor.BaseSpawnPoint.x;
+            // Incoming texture (i=1) enters from the right: visible when localOffset >= spawnX
+            const bool incomingVisible = layers[anchor.LayerIndex].GetIncomingTextureID() == anchor.SpawnTextureID
+                                         && localOffset >= anchor.BaseSpawnPoint.x;
+            Particles.SetEmitterSpawnEnabled(anchor.EmitterIndex, primaryVisible || incomingVisible);
         }
     }
 }

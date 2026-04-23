@@ -24,6 +24,8 @@ public:
     float GetPreviousScrollOffset() const;
     [[nodiscard]]
     unsigned int GetCurrentTextureID() const;
+    [[nodiscard]]
+    unsigned int GetIncomingTextureID() const;
     bool HasTextureID(unsigned int textureID) const;
 
     static unsigned int GetLayerIndexByTextureID(unsigned int textureID, const std::vector<Layer>& layers);
