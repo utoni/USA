@@ -35,19 +35,14 @@ void ParticleEmitter::Update(const std::vector<Layer>& layers)
         float prevSpawnX = Wrap01(anchor.BaseSpawnPoint.x - prevOffset);
         bool wrapped = (x - prevSpawnX > 0.5f);
 
-        if (anchor.ActiveTexIndex >= 0) {
-            // Multi-texture layer: only emit while the correct tile is active.
-            int currTexIndex = static_cast<int>(currOffset);
-            bool isActive = (currTexIndex == anchor.ActiveTexIndex);
+        if (anchor.ActiveTextureID > 0) {
+            int activeIdx = layers[anchor.LayerIndex].GetTextureIndex(anchor.ActiveTextureID);
+            auto currTexIndex = static_cast<int>(currOffset);
+            bool isActive = (activeIdx >= 0 && currTexIndex == activeIdx);
             Particles.SetSpawnEnabled(anchor.EmitterIndex, isActive);
-            // Reset burst while in the inactive tile so it fires immediately
-            // when the active tile becomes visible again.
             if (wrapped && !isActive)
                 Particles.ResetBurst(anchor.EmitterIndex);
         } else {
-            // Single-texture (always active): re-burst every time the tree
-            // re-enters from the right edge so the particle cloud is full
-            // from the moment the tree appears, not just after ~1.4 seconds.
             if (wrapped)
                 Particles.ResetBurst(anchor.EmitterIndex);
         }
@@ -58,13 +53,14 @@ std::tuple<ParticleSystem::EmitterConfig, ParticleEmitter::EmitterAnchor>
 ParticleEmitter::MakeLeafEmitter(
     float x, float y, unsigned int emitterIndex,
     unsigned int layerIndex, unsigned int renderAfterLayer,
-    unsigned int seed
+    unsigned int seed, unsigned int activeTextureID
 ) {
     ParticleEmitter::EmitterAnchor anchor;
     anchor.EmitterIndex = emitterIndex;
     anchor.LayerIndex = layerIndex;
     anchor.RenderAfterLayer = renderAfterLayer;
     anchor.BaseSpawnPoint = {x, y};
+    anchor.ActiveTextureID = activeTextureID;
 
     ParticleSystem::EmitterConfig config;
     config.SpawnRate = 10.0f;

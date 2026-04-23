@@ -14,10 +14,8 @@ public:
         unsigned int EmitterIndex = -1;
         unsigned int LayerIndex = -1;
         unsigned int RenderAfterLayer = -1;
+        unsigned int ActiveTextureID = 0;
         glm::vec2 BaseSpawnPoint;
-        // Restrict emission to a specific texture tile index (0-based).
-        // Set to -1 (default) to always emit regardless of which tile is active.
-        int ActiveTexIndex = -1;
     };
 
 public:
@@ -31,7 +29,7 @@ public:
     static std::tuple<ParticleSystem::EmitterConfig, EmitterAnchor> MakeLeafEmitter(
         float x, float y, unsigned int emitterIndex,
         unsigned int layerIndex, unsigned int renderAfterLayer,
-        unsigned int seed
+        unsigned int seed, unsigned int activeTextureID = 0
     );
 
 private:

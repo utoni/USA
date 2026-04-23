@@ -22,6 +22,8 @@ public:
     float GetScrollOffset() const;
     [[nodiscard]]
     float GetPreviousScrollOffset() const;
+    [[nodiscard]]
+    int GetTextureIndex(unsigned int textureID) const;
 
 private:
     const std::vector<unsigned int> TextureIDs;
