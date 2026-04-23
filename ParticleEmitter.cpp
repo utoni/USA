@@ -28,6 +28,11 @@ void ParticleEmitter::Update(const std::vector<Layer>& layers)
         Particles.ShiftEmitterParticles(anchor.EmitterIndex, -scrollDelta, 0.0f);
         float x = Wrap01(anchor.BaseSpawnPoint.x - currOffset);
         Particles.SetEmitterSpawnPoint(anchor.EmitterIndex, x, anchor.BaseSpawnPoint.y);
+
+        if (anchor.SpawnTextureID != 0) {
+            const bool visible = layers[anchor.LayerIndex].GetCurrentTextureID() == anchor.SpawnTextureID;
+            Particles.SetEmitterSpawnEnabled(anchor.EmitterIndex, visible);
+        }
     }
 }
 
@@ -35,12 +40,13 @@ std::tuple<ParticleSystem::EmitterConfig, ParticleEmitter::EmitterAnchor>
 ParticleEmitter::MakeLeafEmitter(
     float x, float y, unsigned int emitterIndex,
     unsigned int layerIndex, unsigned int renderAfterLayer,
-    unsigned int seed
+    unsigned int seed, unsigned int spawnTextureID
 ) {
     ParticleEmitter::EmitterAnchor anchor;
     anchor.EmitterIndex = emitterIndex;
     anchor.LayerIndex = layerIndex;
     anchor.RenderAfterLayer = renderAfterLayer;
+    anchor.SpawnTextureID = spawnTextureID;
     anchor.BaseSpawnPoint = {x, y};
 
     ParticleSystem::EmitterConfig config;

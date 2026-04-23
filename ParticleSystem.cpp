@@ -189,6 +189,14 @@ void ParticleSystem::SpawnParticle(EmitterState& emitter)
     }
 }
 
+void ParticleSystem::SetEmitterSpawnEnabled(size_t emitterIndex, bool enabled)
+{
+    if (emitterIndex >= Emitters.size())
+        return;
+
+    Emitters[emitterIndex].SpawnEnabled = enabled;
+}
+
 void ParticleSystem::Update(float deltaTimeSeconds)
 {
     if (!Enabled)
@@ -197,15 +205,16 @@ void ParticleSystem::Update(float deltaTimeSeconds)
     for (auto& emitter : Emitters)
     {
         const auto& cfg = emitter.Config;
-        if (cfg.BurstOnStart && !emitter.BurstDone)
+        if (emitter.SpawnEnabled && cfg.BurstOnStart && !emitter.BurstDone)
         {
             for (int burst = 0; burst < cfg.BurstCount; ++burst)
                 SpawnParticle(emitter);
             emitter.BurstDone = true;
         }
 
-        emitter.SpawnAccumulator += cfg.SpawnRate * deltaTimeSeconds;
-        auto spawnCount = static_cast<int>(std::floor(emitter.SpawnAccumulator));
+        if (emitter.SpawnEnabled)
+            emitter.SpawnAccumulator += cfg.SpawnRate * deltaTimeSeconds;
+        auto spawnCount = emitter.SpawnEnabled ? static_cast<int>(std::floor(emitter.SpawnAccumulator)) : 0;
         if (spawnCount > 0)
             emitter.SpawnAccumulator -= static_cast<float>(spawnCount);
 

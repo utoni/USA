@@ -59,6 +59,7 @@ public:
     size_t AddEmitter(const EmitterConfig& config);
     void SetEmitterSpawnPoint(size_t emitterIndex, float x, float y);
     void ShiftEmitterParticles(size_t emitterIndex, float dx, float dy);
+    void SetEmitterSpawnEnabled(size_t emitterIndex, bool enabled);
     void Init();
     void Update(float deltaTimeSeconds);
     void RenderEmitter(size_t emitterIndex, int width, int height);
@@ -89,6 +90,7 @@ private:
         float SpawnAccumulator = 0.0f;
         int Cursor = 0;
         bool BurstDone = false;
+        bool SpawnEnabled = true;
     };
 
     static float RandomRange(std::mt19937& random, float min, float max);

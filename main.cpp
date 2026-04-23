@@ -105,13 +105,15 @@ int main() {
         {
             const auto layerIndex = Layer::GetLayerIndexByTextureID(texMgr.Get("foreground"), layers);
             auto [emitter_cfg, emitter_anchor] = ParticleEmitter::MakeLeafEmitter(0.20f, 0.70f, emitter_count++,
-                layerIndex, std::min(layers.size() - 1, static_cast<size_t>(layerIndex) - 1), 11);
+                layerIndex, std::min(layers.size() - 1, static_cast<size_t>(layerIndex) - 1), 11,
+                texMgr.Get("foreground"));
             emitters.AddEmitter(emitter_cfg, emitter_anchor);
         }
         {
             const auto layerIndex = Layer::GetLayerIndexByTextureID(texMgr.Get("foreground"), layers);
             auto [emitter_cfg, emitter_anchor] = ParticleEmitter::MakeLeafEmitter(0.75f, 0.70f, emitter_count++,
-                layerIndex, std::min(layers.size() - 1, static_cast<size_t>(layerIndex - 1)), 13);
+                layerIndex, std::min(layers.size() - 1, static_cast<size_t>(layerIndex) - 1), 13,
+                texMgr.Get("foreground"));
             emitters.AddEmitter(emitter_cfg, emitter_anchor);
         }
         particles.Init();

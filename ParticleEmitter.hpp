@@ -14,6 +14,7 @@ public:
         unsigned int EmitterIndex = -1;
         unsigned int LayerIndex = -1;
         unsigned int RenderAfterLayer = -1;
+        unsigned int SpawnTextureID = 0; // 0 means always spawn
         glm::vec2 BaseSpawnPoint;
     };
 
@@ -28,7 +29,7 @@ public:
     static std::tuple<ParticleSystem::EmitterConfig, EmitterAnchor> MakeLeafEmitter(
         float x, float y, unsigned int emitterIndex,
         unsigned int layerIndex, unsigned int renderAfterLayer,
-        unsigned int seed
+        unsigned int seed, unsigned int spawnTextureID = 0
     );
 
 private:

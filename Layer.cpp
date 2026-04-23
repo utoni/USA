@@ -70,6 +70,17 @@ float Layer::GetPreviousScrollOffset() const
     return std::fmod(PreviousOffset, static_cast<float>(texCount));
 }
 
+unsigned int Layer::GetCurrentTextureID() const
+{
+    const int texCount = static_cast<int>(TextureIDs.size());
+    if (texCount <= 0)
+        return 0;
+
+    const float texOffset = std::fmod(Offset, static_cast<float>(texCount));
+    const int texIndex = static_cast<int>(texOffset);
+    return TextureIDs[static_cast<size_t>(texIndex)];
+}
+
 bool Layer::HasTextureID(unsigned int textureID) const
 {
     const auto iter = std::find_if(TextureIDs.begin(), TextureIDs.end(), [textureID](unsigned int other) {
