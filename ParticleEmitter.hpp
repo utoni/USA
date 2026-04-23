@@ -15,7 +15,6 @@ public:
         unsigned int LayerIndex = -1;
         unsigned int RenderAfterLayer = -1;
         unsigned int SpawnTextureID = 0; // 0 means always spawn/render
-        bool RenderEnabled = true;
         glm::vec2 BaseSpawnPoint;
     };
 

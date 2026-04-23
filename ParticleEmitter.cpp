@@ -1,9 +1,11 @@
 #include "ParticleEmitter.hpp"
 
+#include <cmath>
+
 void ParticleEmitter::RenderAfterLayer(int width, int height, unsigned int layerIndex)
 {
     for (auto& anchor : Anchors) {
-        if (anchor.RenderAfterLayer == layerIndex && anchor.RenderEnabled)
+        if (anchor.RenderAfterLayer == layerIndex)
             Particles.RenderEmitter(anchor.EmitterIndex, width, height);
     }
 }
@@ -30,9 +32,10 @@ void ParticleEmitter::Update(const std::vector<Layer>& layers)
         Particles.SetEmitterSpawnPoint(anchor.EmitterIndex, x, anchor.BaseSpawnPoint.y);
 
         if (anchor.SpawnTextureID != 0) {
-            const bool visible = layers[anchor.LayerIndex].GetCurrentTextureID() == anchor.SpawnTextureID;
+            const float localOffset = currOffset - std::floor(currOffset);
+            const bool visible = layers[anchor.LayerIndex].GetCurrentTextureID() == anchor.SpawnTextureID
+                                 && localOffset <= anchor.BaseSpawnPoint.x;
             Particles.SetEmitterSpawnEnabled(anchor.EmitterIndex, visible);
-            anchor.RenderEnabled = visible;
         }
     }
 }

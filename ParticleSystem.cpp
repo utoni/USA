@@ -194,7 +194,18 @@ void ParticleSystem::SetEmitterSpawnEnabled(size_t emitterIndex, bool enabled)
     if (emitterIndex >= Emitters.size())
         return;
 
-    Emitters[emitterIndex].SpawnEnabled = enabled;
+    auto& emitter = Emitters[emitterIndex];
+    if (emitter.SpawnEnabled == enabled)
+        return;
+
+    emitter.SpawnEnabled = enabled;
+    if (!enabled) {
+        for (auto& p : emitter.Particles)
+            p.Active = false;
+    } else {
+        emitter.BurstDone = false;
+        emitter.SpawnAccumulator = 0.0f;
+    }
 }
 
 void ParticleSystem::Update(float deltaTimeSeconds)
