@@ -105,13 +105,13 @@ int main() {
         {
             const auto layerIndex = Layer::GetLayerIndexByTextureID(texMgr.Get("foreground"), layers);
             auto [emitter_cfg, emitter_anchor] = ParticleEmitter::MakeLeafEmitter(0.20f, 0.70f, emitter_count++,
-                layerIndex, std::min(layers.size() - 1, static_cast<size_t>(layerIndex) - 1), 11);
+                layerIndex, layerIndex, 11);
             emitters.AddEmitter(emitter_cfg, emitter_anchor);
         }
         {
             const auto layerIndex = Layer::GetLayerIndexByTextureID(texMgr.Get("foreground"), layers);
             auto [emitter_cfg, emitter_anchor] = ParticleEmitter::MakeLeafEmitter(0.75f, 0.70f, emitter_count++,
-                layerIndex, std::min(layers.size() - 1, static_cast<size_t>(layerIndex - 1)), 13);
+                layerIndex, layerIndex, 13);
             emitters.AddEmitter(emitter_cfg, emitter_anchor);
         }
         particles.Init();
@@ -121,8 +121,6 @@ int main() {
         bool toggleGodraysWasDown = false;
         bool toggleModeWasDown = false;
         bool toggleDebugWasDown = false;
-        bool toggleDecreaseScrollWasDown = false;
-        bool toggleIncreaseScrollWasDown = false;
 
         while (!glfwWindowShouldClose(window)) {
             auto currentTime = glfwGetTime();
@@ -184,17 +182,23 @@ int main() {
                 fb.ToggleGodraysMaskDebug();
             toggleDebugWasDown = toggleDebugDown;
 
-            const bool toggleDecreaseScrollDown = glfwGetKey(window, GLFW_KEY_LEFT);
-            if (toggleDecreaseScrollDown && !toggleDecreaseScrollWasDown)
-                for (auto& layer : layers)
-                    layer.SetScrollSpeed(layer.GetScrollSpeed() * 0.95f);
-            toggleDecreaseScrollWasDown = toggleDecreaseScrollDown;
+            constexpr float scrollAdjustRate = 0.6f;
 
-            const bool toggleIncreaseScrollDown = glfwGetKey(window, GLFW_KEY_RIGHT);
-            if (toggleIncreaseScrollDown && !toggleIncreaseScrollWasDown)
+            if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
                 for (auto& layer : layers)
-                    layer.SetScrollSpeed(layer.GetScrollSpeed() * 1.05f);
-            toggleIncreaseScrollWasDown = toggleIncreaseScrollDown;
+                    layer.SetScrollSpeed(layer.GetScrollSpeed() + scrollAdjustRate * static_cast<float>(delta));
+
+            if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+                for (auto& layer : layers)
+                    layer.SetScrollSpeed(layer.GetScrollSpeed() - scrollAdjustRate * static_cast<float>(delta));
+
+            if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+                for (auto& layer : layers)
+                    layer.SetScrollSpeedY(layer.GetScrollSpeedY() + scrollAdjustRate * static_cast<float>(delta));
+
+            if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+                for (auto& layer : layers)
+                    layer.SetScrollSpeedY(layer.GetScrollSpeedY() - scrollAdjustRate * static_cast<float>(delta));
 
             if (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_RELEASE)
                 break;

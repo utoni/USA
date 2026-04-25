@@ -19,15 +19,24 @@ void ParticleEmitter::Update(const std::vector<Layer>& layers)
     for (const auto& anchor : Anchors) {
         if (anchor.LayerIndex >= layers.size()) continue;
 
-        float currOffset = layers[anchor.LayerIndex].GetScrollOffset();
-        float prevOffset = layers[anchor.LayerIndex].GetPreviousScrollOffset();
-        float scrollDelta = currOffset - prevOffset;
-        if (scrollDelta > 0.5f)  scrollDelta -= 1.0f;
-        if (scrollDelta < -0.5f) scrollDelta += 1.0f;
+        // --- Horizontal ---
+        float currOffsetX = layers[anchor.LayerIndex].GetScrollOffset();
+        float prevOffsetX = layers[anchor.LayerIndex].GetPreviousScrollOffset();
+        float scrollDeltaX = currOffsetX - prevOffsetX;
+        if (scrollDeltaX >  0.5f) scrollDeltaX -= 1.0f;
+        if (scrollDeltaX < -0.5f) scrollDeltaX += 1.0f;
 
-        Particles.ShiftEmitterParticles(anchor.EmitterIndex, -scrollDelta, 0.0f);
-        float x = Wrap01(anchor.BaseSpawnPoint.x - currOffset);
-        Particles.SetEmitterSpawnPoint(anchor.EmitterIndex, x, anchor.BaseSpawnPoint.y);
+        // --- Vertical ---
+        float currOffsetY = layers[anchor.LayerIndex].GetScrollOffsetY();
+        float prevOffsetY = layers[anchor.LayerIndex].GetPreviousScrollOffsetY();
+        float scrollDeltaY = currOffsetY - prevOffsetY;
+        if (scrollDeltaY >  0.5f) scrollDeltaY -= 1.0f;
+        if (scrollDeltaY < -0.5f) scrollDeltaY += 1.0f;
+
+        Particles.ShiftEmitterParticles(anchor.EmitterIndex, -scrollDeltaX, -scrollDeltaY);
+        float x = Wrap01(anchor.BaseSpawnPoint.x - currOffsetX);
+        float y = anchor.BaseSpawnPoint.y - currOffsetY;
+        Particles.SetEmitterSpawnPoint(anchor.EmitterIndex, x, y);
     }
 }
 

@@ -19,9 +19,16 @@ public:
     float GetScrollSpeed() const { return ScrollSpeed; }
     void SetScrollSpeed(float newSpeed) { ScrollSpeed = newSpeed; }
     [[nodiscard]]
+    float GetScrollSpeedY() const { return ScrollSpeedY; }
+    void SetScrollSpeedY(float newSpeed) { ScrollSpeedY = newSpeed; }
+    [[nodiscard]]
     float GetScrollOffset() const;
     [[nodiscard]]
     float GetPreviousScrollOffset() const;
+    [[nodiscard]]
+    float GetScrollOffsetY() const;
+    [[nodiscard]]
+    float GetPreviousScrollOffsetY() const;
     bool HasTextureID(unsigned int textureID) const;
 
     static unsigned int GetLayerIndexByTextureID(unsigned int textureID, const std::vector<Layer>& layers);
@@ -33,6 +40,9 @@ private:
         int MVP = -1;
     } Locations;
     float ScrollSpeed;
+    float ScrollSpeedY = 0.0f;
     float Offset = 0.0f;
     float PreviousOffset = 0.0f;
+    float OffsetY = 0.0f;
+    float PreviousOffsetY = 0.0f;
 };

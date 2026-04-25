@@ -18,8 +18,10 @@ Layer::Layer(const std::vector<unsigned int>& textureIDs,
 
 void Layer::Update(float delta)
 {
-    PreviousOffset = Offset;
-    Offset += ScrollSpeed * delta;
+    PreviousOffset  = Offset;
+    PreviousOffsetY = OffsetY;
+    Offset   += ScrollSpeed  * delta;
+    OffsetY  += ScrollSpeedY * delta;
 }
 
 void Layer::Render(int width, int height,
@@ -29,26 +31,32 @@ void Layer::Render(int width, int height,
     auto texOffset = fmod(static_cast<double>(Offset),
                           static_cast<double>(texCount));
     int texIndex = (int)texOffset;
-    auto localOffset = texOffset - texIndex;
+    auto localOffsetX = texOffset - texIndex;
+
+    auto localOffsetY = fmod(static_cast<double>(OffsetY), 1.0);
+    if (localOffsetY < 0.0) localOffsetY += 1.0;
 
     glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(width),
                                       0.0f, static_cast<float>(height));
 
-    for (int i = 0; i < 2; ++i) {
-        int idx = (texIndex + i) % texCount;
-        float x = floor((-localOffset + i) * width);
+    for (int iy = 0; iy < 2; ++iy) {
+        for (int ix = 0; ix < 2; ++ix) {
+            int idx = (texIndex + ix) % texCount;
+            float x = floor((-localOffsetX + ix) * width);
+            float y = floor((-localOffsetY + iy) * height);
 
-        const auto model = Transform::Create2D(x, 0.0f,
-                                                                static_cast<float>(width),
-                                                                static_cast<float>(height));
-        glm::mat4 mvp = projection * model;
+            const auto model = Transform::Create2D(x, y,
+                                                   static_cast<float>(width),
+                                                   static_cast<float>(height));
+            glm::mat4 mvp = projection * model;
 
-        LayerShader.Use();
-        LayerShader.SetUniform(Locations.MVP, glm::value_ptr(mvp));
+            LayerShader.Use();
+            LayerShader.SetUniform(Locations.MVP, glm::value_ptr(mvp));
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, TextureIDs[idx]);
-        quad.Draw();
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, TextureIDs[idx]);
+            quad.Draw();
+        }
     }
 }
 
@@ -68,6 +76,16 @@ float Layer::GetPreviousScrollOffset() const
         return 0.0f;
 
     return std::fmod(PreviousOffset, static_cast<float>(texCount));
+}
+
+float Layer::GetScrollOffsetY() const
+{
+    return std::fmod(OffsetY, 1.0f);
+}
+
+float Layer::GetPreviousScrollOffsetY() const
+{
+    return std::fmod(PreviousOffsetY, 1.0f);
 }
 
 bool Layer::HasTextureID(unsigned int textureID) const
