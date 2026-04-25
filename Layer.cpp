@@ -28,6 +28,7 @@ void Layer::Render(int width, int height,
     int texCount = static_cast<int>(TextureIDs.size());
     auto texOffset = fmod(static_cast<double>(Offset),
                           static_cast<double>(texCount));
+    if (texOffset < 0.0) texOffset += static_cast<double>(texCount);
     int texIndex = (int)texOffset;
     auto localOffset = texOffset - texIndex;
 
@@ -58,7 +59,9 @@ float Layer::GetScrollOffset() const
     if (texCount <= 0)
         return 0.0f;
 
-    return std::fmod(Offset, static_cast<float>(texCount));
+    float offset = std::fmod(Offset, static_cast<float>(texCount));
+    if (offset < 0.0f) offset += static_cast<float>(texCount);
+    return offset;
 }
 
 float Layer::GetPreviousScrollOffset() const
@@ -67,7 +70,9 @@ float Layer::GetPreviousScrollOffset() const
     if (texCount <= 0)
         return 0.0f;
 
-    return std::fmod(PreviousOffset, static_cast<float>(texCount));
+    float offset = std::fmod(PreviousOffset, static_cast<float>(texCount));
+    if (offset < 0.0f) offset += static_cast<float>(texCount);
+    return offset;
 }
 
 bool Layer::HasTextureID(unsigned int textureID) const
