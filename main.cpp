@@ -99,6 +99,12 @@ int main() {
             Layer{ { texMgr.Get("foreground"), texMgr.Get("foreground2") }, layerShader, 0.35f },
         };
 
+        std::vector<float> baseScrollSpeeds;
+        baseScrollSpeeds.reserve(layers.size());
+        for (const auto& layer : layers)
+            baseScrollSpeeds.push_back(layer.GetScrollSpeed());
+        float scrollFactor = 1.0f;
+
         ParticleSystem particles(shaderMgr.Get("particle"));
         ParticleEmitter emitters(particles);
         unsigned int emitter_count = 0;
@@ -184,16 +190,20 @@ int main() {
                 fb.ToggleGodraysMaskDebug();
             toggleDebugWasDown = toggleDebugDown;
 
-            const bool toggleDecreaseScrollDown = glfwGetKey(window, GLFW_KEY_LEFT);
-            if (toggleDecreaseScrollDown && !toggleDecreaseScrollWasDown)
-                for (auto& layer : layers)
-                    layer.SetScrollSpeed(layer.GetScrollSpeed() * 0.95f);
+            const bool toggleDecreaseScrollDown = glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS;
+            if (toggleDecreaseScrollDown && !toggleDecreaseScrollWasDown) {
+                scrollFactor -= 0.1f;
+                for (size_t i = 0; i < layers.size(); ++i)
+                    layers[i].SetScrollSpeed(baseScrollSpeeds[i] * scrollFactor);
+            }
             toggleDecreaseScrollWasDown = toggleDecreaseScrollDown;
 
-            const bool toggleIncreaseScrollDown = glfwGetKey(window, GLFW_KEY_RIGHT);
-            if (toggleIncreaseScrollDown && !toggleIncreaseScrollWasDown)
-                for (auto& layer : layers)
-                    layer.SetScrollSpeed(layer.GetScrollSpeed() * 1.05f);
+            const bool toggleIncreaseScrollDown = glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS;
+            if (toggleIncreaseScrollDown && !toggleIncreaseScrollWasDown) {
+                scrollFactor += 0.1f;
+                for (size_t i = 0; i < layers.size(); ++i)
+                    layers[i].SetScrollSpeed(baseScrollSpeeds[i] * scrollFactor);
+            }
             toggleIncreaseScrollWasDown = toggleIncreaseScrollDown;
 
             if (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_RELEASE)
