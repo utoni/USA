@@ -14,6 +14,7 @@ public:
         unsigned int EmitterIndex = -1;
         unsigned int LayerIndex = -1;
         unsigned int RenderAfterLayer = -1;
+        unsigned int TextureIndexInLayer = 0;
         glm::vec2 BaseSpawnPoint;
     };
 

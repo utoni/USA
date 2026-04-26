@@ -19,15 +19,22 @@ void ParticleEmitter::Update(const std::vector<Layer>& layers)
     for (const auto& anchor : Anchors) {
         if (anchor.LayerIndex >= layers.size()) continue;
 
-        float currOffset = layers[anchor.LayerIndex].GetScrollOffset();
-        float prevOffset = layers[anchor.LayerIndex].GetPreviousScrollOffset();
-        float scrollDelta = currOffset - prevOffset;
-        if (scrollDelta > 0.5f)  scrollDelta -= 1.0f;
-        if (scrollDelta < -0.5f) scrollDelta += 1.0f;
+        const auto& layer = layers[anchor.LayerIndex];
 
+        float scrollDelta = layer.GetScrollDelta();
         Particles.ShiftEmitterParticles(anchor.EmitterIndex, -scrollDelta, 0.0f);
-        float x = Wrap01(anchor.BaseSpawnPoint.x - currOffset);
-        Particles.SetEmitterSpawnPoint(anchor.EmitterIndex, x, anchor.BaseSpawnPoint.y);
+
+        float currOffset  = layer.GetScrollOffset();
+        int   texCount    = layer.GetTextureCount();
+        float localOffset = currOffset - std::floor(currOffset);
+        int   texIndex    = static_cast<int>(std::floor(currOffset));
+        int slot = (static_cast<int>(anchor.TextureIndexInLayer) - texIndex + texCount) % texCount;
+        float x = static_cast<float>(slot) + anchor.BaseSpawnPoint.x - localOffset;
+
+        if (x >= 0.0f && x <= 1.0f)
+            Particles.SetEmitterSpawnPoint(anchor.EmitterIndex, x, anchor.BaseSpawnPoint.y);
+        else
+            Particles.SetEmitterSpawnPoint(anchor.EmitterIndex, -10.0f, anchor.BaseSpawnPoint.y);
     }
 }
 
